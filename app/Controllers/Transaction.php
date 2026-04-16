@@ -1,0 +1,176 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\TransactionModel;
+use App\Models\CategoryModel;
+
+class Transaction extends BaseController
+{
+    protected TransactionModel $model;
+    protected CategoryModel    $catModel;
+
+    public function __construct()
+    {
+        $this->model    = new TransactionModel();
+        $this->catModel = new CategoryModel();
+    }
+
+    public function index()
+    {
+        $userId  = session()->get('user_id');
+        $filters = [
+            'type'        => $this->request->getGet('type'),
+            'month'       => $this->request->getGet('month') ?? date('Y-m'),
+            'category_id' => $this->request->getGet('category_id'),
+            'search'      => $this->request->getGet('search'),
+        ];
+
+        $transactions = $this->model->getWithCategory($userId, $filters);
+        $incomeCategories  = $this->catModel->getForUser($userId, 'income');
+        $expenseCategories = $this->catModel->getForUser($userId, 'expense');
+
+        return view('transaction/index', [
+            'transactions'      => $transactions,
+            'filters'           => $filters,
+            'incomeCategories'  => $incomeCategories,
+            'expenseCategories' => $expenseCategories,
+        ]);
+    }
+
+    public function create()
+    {
+        $userId = session()->get('user_id');
+        $type   = $this->request->getGet('type') ?? 'expense';
+
+        $incomeCategories  = $this->catModel->getForUser($userId, 'income');
+        $expenseCategories = $this->catModel->getForUser($userId, 'expense');
+
+        return view('transaction/form', [
+            'mode'              => 'create',
+            'type'              => $type,
+            'transaction'       => null,
+            'incomeCategories'  => $incomeCategories,
+            'expenseCategories' => $expenseCategories,
+        ]);
+    }
+
+    public function store()
+    {
+        $userId = session()->get('user_id');
+
+        $rules = [
+            'type'             => 'required|in_list[income,expense]',
+            'amount'           => 'required|numeric|greater_than[0]',
+            'transaction_date' => 'required|valid_date[Y-m-d]',
+            'category_id'      => 'required|integer',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'user_id'          => $userId,
+            'category_id'      => $this->request->getPost('category_id'),
+            'type'             => $this->request->getPost('type'),
+            'amount'           => $this->request->getPost('amount'),
+            'description'      => $this->request->getPost('description'),
+            'transaction_date' => $this->request->getPost('transaction_date'),
+            'payment_method'   => $this->request->getPost('payment_method') ?? 'cash',
+            'note'             => $this->request->getPost('note'),
+            'reference_no'     => $this->request->getPost('reference_no'),
+            'is_recurring'     => $this->request->getPost('is_recurring') ? 1 : 0,
+            'recurring_type'   => $this->request->getPost('recurring_type'),
+        ];
+
+        if ($this->model->insert($data)) {
+            return redirect()->to('/transaction')
+                ->with('success', lang('App.save_success'));
+        }
+
+        return redirect()->back()->withInput()->with('error', lang('App.error'));
+    }
+
+    public function edit(int $id)
+    {
+        $userId      = session()->get('user_id');
+        $role        = session()->get('role');
+        $transaction = $this->model->find($id);
+
+        if (! $transaction || ($transaction['user_id'] != $userId && $role !== 'admin')) {
+            return redirect()->to('/transaction')->with('error', lang('App.not_found'));
+        }
+
+        $incomeCategories  = $this->catModel->getForUser($userId, 'income');
+        $expenseCategories = $this->catModel->getForUser($userId, 'expense');
+
+        return view('transaction/form', [
+            'mode'              => 'edit',
+            'type'              => $transaction['type'],
+            'transaction'       => $transaction,
+            'incomeCategories'  => $incomeCategories,
+            'expenseCategories' => $expenseCategories,
+        ]);
+    }
+
+    public function update(int $id)
+    {
+        $userId      = session()->get('user_id');
+        $role        = session()->get('role');
+        $transaction = $this->model->find($id);
+
+        if (! $transaction || ($transaction['user_id'] != $userId && $role !== 'admin')) {
+            return redirect()->to('/transaction')->with('error', lang('App.not_found'));
+        }
+
+        $rules = [
+            'type'             => 'required|in_list[income,expense]',
+            'amount'           => 'required|numeric|greater_than[0]',
+            'transaction_date' => 'required|valid_date[Y-m-d]',
+            'category_id'      => 'required|integer',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'category_id'      => $this->request->getPost('category_id'),
+            'type'             => $this->request->getPost('type'),
+            'amount'           => $this->request->getPost('amount'),
+            'description'      => $this->request->getPost('description'),
+            'transaction_date' => $this->request->getPost('transaction_date'),
+            'payment_method'   => $this->request->getPost('payment_method') ?? 'cash',
+            'note'             => $this->request->getPost('note'),
+            'reference_no'     => $this->request->getPost('reference_no'),
+        ];
+
+        $this->model->update($id, $data);
+        return redirect()->to('/transaction')->with('success', lang('App.update_success'));
+    }
+
+    public function delete(int $id)
+    {
+        $userId      = session()->get('user_id');
+        $role        = session()->get('role');
+        $transaction = $this->model->find($id);
+
+        if (! $transaction || ($transaction['user_id'] != $userId && $role !== 'admin')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => lang('App.not_found')]);
+        }
+
+        $this->model->delete($id);
+        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.delete_success')]);
+    }
+
+    // ─── AJAX: Summary untuk bulan tertentu ───────────────────────────────────
+    public function summary()
+    {
+        $userId = session()->get('user_id');
+        $month  = $this->request->getGet('month') ?? date('Y-m');
+        $data   = $this->model->getMonthlySummary($userId, $month);
+        $data['balance'] = $data['total_income'] - $data['total_expense'];
+        return $this->response->setJSON($data);
+    }
+}

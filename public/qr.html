@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code | CashFlow App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #qrcode img { margin: auto; }
+        #qrcode canvas { margin: auto; display: block; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4">
+
+<!-- Background blobs -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+</div>
+
+<div class="relative z-10 w-full max-w-sm">
+    <!-- Card -->
+    <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl text-center">
+
+        <!-- Logo -->
+        <div class="flex items-center justify-center gap-3 mb-6">
+            <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+            </div>
+            <div class="text-left">
+                <h1 class="text-xl font-bold text-white leading-tight">CashFlow</h1>
+                <p class="text-xs text-emerald-400">Manajemen Keuangan</p>
+            </div>
+        </div>
+
+        <!-- QR Code Box -->
+        <div class="bg-white rounded-2xl p-5 mb-5 shadow-inner inline-block w-full">
+            <div id="qrcode" class="flex justify-center"></div>
+        </div>
+
+        <!-- URL display -->
+        <div class="bg-slate-700/60 border border-slate-600 rounded-xl px-4 py-3 mb-5">
+            <p class="text-xs text-slate-400 mb-1">Scan untuk buka di HP:</p>
+            <p id="urlDisplay" class="text-sm font-mono text-emerald-400 font-semibold break-all"></p>
+        </div>
+
+        <!-- Instructions -->
+        <ol class="text-xs text-slate-400 text-left space-y-2 mb-6">
+            <li class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 mt-0.5 text-xs">1</span>
+                Pastikan HP terhubung ke <strong class="text-slate-300">WiFi yang sama</strong> dengan komputer ini
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 mt-0.5 text-xs">2</span>
+                Buka <strong class="text-slate-300">Kamera HP</strong> atau aplikasi <strong class="text-slate-300">QR Scanner</strong>
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 mt-0.5 text-xs">3</span>
+                Arahkan ke QR Code di atas, lalu tap link yang muncul
+            </li>
+        </ol>
+
+        <!-- Demo credentials -->
+        <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl p-4 mb-5 text-left">
+            <p class="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0v1h2V7a5 5 0 00-5-5z"/></svg>
+                Login Demo
+            </p>
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-slate-400">Admin:</span>
+                    <span class="text-xs font-mono bg-slate-800 text-white px-2 py-0.5 rounded">admin / admin123</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-slate-400">User:</span>
+                    <span class="text-xs font-mono bg-slate-800 text-white px-2 py-0.5 rounded">john_doe / user123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-2 no-print">
+            <button onclick="window.print()"
+                class="flex-1 flex items-center justify-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-semibold py-2.5 rounded-xl transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+                Print
+            </button>
+            <button onclick="copyUrl()"
+                class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors" id="copyBtn">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copy URL
+            </button>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-slate-600 mt-4">
+        Halaman ini: <a href="./qr.html" class="text-slate-500 hover:text-slate-400">http://localhost:8080/qr.html</a>
+    </p>
+</div>
+
+<script>
+    // Detect current server IP from browser, but prioritize LAN IP for mobile scanning
+    const LAN_IP = '192.168.98.11';
+    let host = window.location.hostname;
+    
+    // If viewing from localhost, force the QR to use the LAN IP so phones can scan it
+    if (host === 'localhost' || host === '127.0.0.1') {
+        host = LAN_IP;
+    }
+    
+    const port = window.location.port || '8080';
+    const appUrl = `http://${host}:${port}/auth/login`;
+
+    document.getElementById('urlDisplay').textContent = appUrl;
+
+    // Generate QR Code
+    new QRCode(document.getElementById('qrcode'), {
+        text: appUrl,
+        width: 220,
+        height: 220,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    function copyUrl() {
+        navigator.clipboard.writeText(appUrl).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = '✓ Tersalin!';
+            btn.classList.remove('bg-emerald-500','hover:bg-emerald-600');
+            btn.classList.add('bg-teal-600');
+            setTimeout(() => {
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy URL`;
+                btn.classList.add('bg-emerald-500','hover:bg-emerald-600');
+                btn.classList.remove('bg-teal-600');
+            }, 2000);
+        });
+    }
+</script>
+</body>
+</html>
