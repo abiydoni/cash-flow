@@ -111,7 +111,7 @@ class Profile extends BaseController
         }
 
         $this->userModel->skipValidation(true)->update($userId, [
-            'password' => password_hash($this->request->getPost('new_password'), PASSWORD_BCRYPT),
+            'password' => $this->request->getPost('new_password'),
         ]);
 
         return redirect()->to('/profile')->with('success', lang('App.password_success'));
