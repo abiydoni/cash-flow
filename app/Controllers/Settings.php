@@ -103,11 +103,11 @@ class Settings extends BaseController
         $db->transStart();
 
         // 1. Reset Financial Data
-        $db->table('transactions')->truncate();
-        $db->table('dues_payments')->truncate();
-        $db->table('budgets')->truncate();
-        $db->table('dues_types')->truncate();
-        $db->table('members')->truncate();
+        $db->table('transactions')->where('id >', 0)->delete();
+        $db->table('dues_payments')->where('id >', 0)->delete();
+        $db->table('budgets')->where('id >', 0)->delete();
+        $db->table('dues_types')->where('id >', 0)->delete();
+        $db->table('members')->where('id >', 0)->delete();
 
         // 2. Reset Categories (Keep system categories, delete user custom)
         $db->table('categories')->where('user_id IS NOT NULL', null, false)->delete();
