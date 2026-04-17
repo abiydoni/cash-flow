@@ -143,7 +143,7 @@ function deleteCat(id) {
         cancelButtonColor: '#64748b',
         confirmButtonText: '<?= lang('App.delete_yes') ?>',
         cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b', color: '#f1f5f9',
+        ...getSwalConfig(false)
     }).then((result) => {
         if (result.isConfirmed) {
             showLoading('<?= lang('App.processing') ?>');

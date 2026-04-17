@@ -15,9 +15,7 @@
         <table class="w-full">
             <thead>
                 <tr class="border-b border-slate-200 dark:border-slate-700">
-                    <th class="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 px-5 py-3">User</th>
-                    <th class="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 px-5 py-3">Email</th>
-                    <th class="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 px-5 py-3">Kota</th>
+                    <th class="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 px-5 py-3"><?= lang('App.user') ?></th>
                     <th class="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 px-5 py-3"><?= lang('App.role') ?></th>
                     <th class="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 px-5 py-3"><?= lang('App.status') ?></th>
                     <th class="text-right text-xs font-semibold text-slate-500 dark:text-slate-400 px-5 py-3"><?= lang('App.actions') ?></th>
@@ -33,36 +31,41 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-slate-800 dark:text-white"><?= esc($u['full_name'] ?? '-') ?></p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">@<?= esc($u['username']) ?></p>
                             </div>
                         </div>
                     </td>
-                    <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-300"><?= esc($u['email']) ?></td>
-                    <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-300"><?= esc($u['city'] ?? '-') ?></td>
                     <td class="px-5 py-3">
                         <span class="text-xs px-2 py-1 rounded-lg <?= $u['role']==='admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300' ?>">
                             <?= ucfirst($u['role']) ?>
                         </span>
                     </td>
                     <td class="px-5 py-3">
-                        <span id="status-badge-<?= $u['id'] ?>" class="text-xs px-2 py-1 rounded-lg <?= $u['is_active'] ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' ?>">
-                            <?= $u['is_active'] ? lang('App.active') : lang('App.inactive') ?>
-                        </span>
+                        <?php if ($u['role'] !== 'admin'): ?>
+                        <div class="flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="status-switch-<?= $u['id'] ?>" class="sr-only peer" 
+                                    <?= $u['is_active'] ? 'checked' : '' ?> 
+                                    onchange="toggleUser(<?= $u['id'] ?>, this)">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500 shadow-sm"></div>
+                            </label>
+                            <span class="text-[10px] font-bold uppercase tracking-wider <?= $u['is_active'] ? 'text-emerald-500' : 'text-slate-400' ?>" id="status-text-<?= $u['id'] ?>">
+                                <?= $u['is_active'] ? lang('App.active') : lang('App.inactive') ?>
+                            </span>
+                        </div>
+                        <?php else: ?>
+                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest italic">-</span>
+                        <?php endif; ?>
                     </td>
                     <td class="px-5 py-3 text-right">
                         <div class="flex items-center justify-end gap-1.5">
                             <?php if ($u['id'] != session('user_id')): ?>
-                            <button onclick="toggleUser(<?= $u['id'] ?>, <?= $u['is_active'] ?>)"
-                                class="text-xs px-3 py-1.5 rounded-lg <?= $u['is_active'] ? 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-400' : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400' ?> transition-colors font-medium"
-                                id="toggle-btn-<?= $u['id'] ?>">
-                                <?= $u['is_active'] ? lang('App.deactivate') : lang('App.activate') ?>
-                            </button>
                             <button onclick="deleteUser(<?= $u['id'] ?>)"
-                                class="text-xs px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-colors font-medium">
-                                <?= lang('App.delete') ?>
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-colors"
+                                title="<?= lang('App.delete') ?>">
+                                <ion-icon name="trash-outline"></ion-icon>
                             </button>
                             <?php else: ?>
-                            <span class="text-xs text-slate-400 dark:text-slate-500"><?= lang('App.your_account') ?></span>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"><?= lang('App.your_account') ?></span>
                             <?php endif; ?>
                         </div>
                     </td>
@@ -82,21 +85,29 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-slate-800 dark:text-white"><?= esc($u['full_name'] ?? '-') ?></p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">@<?= esc($u['username']) ?> · <?= esc($u['email']) ?></p>
-                    <?php if (!empty($u['city'])): ?>
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5"><ion-icon name="location-outline"></ion-icon> <?= esc($u['city']) ?></p>
-                    <?php endif; ?>
-                    <div class="flex items-center gap-2 mt-2 flex-wrap">
-                        <span class="text-xs px-2 py-0.5 rounded-lg <?= $u['role']==='admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300' ?>"><?= ucfirst($u['role']) ?></span>
-                        <span id="status-badge-<?= $u['id'] ?>" class="text-xs px-2 py-0.5 rounded-lg <?= $u['is_active'] ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' ?>"><?= $u['is_active'] ? lang('App.active') : lang('App.inactive') ?></span>
-                        <?php if ($u['id'] != session('user_id')): ?>
-                        <button onclick="toggleUser(<?= $u['id'] ?>, <?= $u['is_active'] ?>)" id="toggle-btn-<?= $u['id'] ?>"
-                            class="text-xs px-2 py-0.5 rounded-lg <?= $u['is_active'] ? 'bg-orange-500/20 text-orange-400' : 'bg-emerald-500/20 text-emerald-400' ?> font-medium">
-                            <?= $u['is_active'] ? lang('App.deactivate') : lang('App.activate') ?>
-                        </button>
-                        <button onclick="deleteUser(<?= $u['id'] ?>)" class="text-xs px-2 py-0.5 rounded-lg bg-red-500/20 text-red-400 font-medium"><?= lang('App.delete') ?></button>
+                    <div class="flex items-center gap-3 mt-2">
+                        <span class="text-[10px] px-2 py-0.5 rounded-lg <?= $u['role']==='admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300' ?>"><?= ucfirst($u['role']) ?></span>
+                        <?php if ($u['role'] !== 'admin'): ?>
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="status-switch-m-<?= $u['id'] ?>" class="sr-only peer" 
+                                    <?= $u['is_active'] ? 'checked' : '' ?> 
+                                    onchange="toggleUser(<?= $u['id'] ?>, this)">
+                                <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500"></div>
+                            </label>
+                            <span class="text-[9px] font-bold uppercase tracking-tighter <?= $u['is_active'] ? 'text-emerald-500' : 'text-slate-400' ?>" id="status-text-m-<?= $u['id'] ?>">
+                                <?= $u['is_active'] ? lang('App.active') : lang('App.inactive') ?>
+                            </span>
+                        </div>
                         <?php endif; ?>
                     </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <?php if ($u['id'] != session('user_id')): ?>
+                    <button onclick="deleteUser(<?= $u['id'] ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 text-red-400">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -108,34 +119,45 @@
 
 <?= $this->section('scripts') ?>
 <script>
-function toggleUser(id, currentActive) {
-    const action = currentActive ? 'nonaktifkan' : 'aktifkan';
+function toggleUser(id, el) {
+    const isNowChecked = el.checked;
     Swal.fire({
         title: `User?`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: currentActive ? '#f97316' : '#10b981',
+        confirmButtonColor: isNowChecked ? '#10b981' : '#f97316',
         cancelButtonColor: '#475569',
         confirmButtonText: `Ya!`,
         cancelButtonText: '<?= lang('App.cancel') ?>',
         background: '#1e293b', color: '#f1f5f9',
     }).then(r => {
-        if (!r.isConfirmed) return;
+        if (!r.isConfirmed) {
+            el.checked = !isNowChecked; // Revert
+            return;
+        }
         showLoading();
         fetch(`<?= base_url('admin/users/toggle/') ?>${id}`, { method: 'POST' })
             .then(r => r.json())
             .then(data => {
                 hideLoading();
-                const badge = document.getElementById('status-badge-'+id);
-                const btn   = document.getElementById('toggle-btn-'+id);
+                const sw = document.getElementById('status-switch-'+id);
+                const swM = document.getElementById('status-switch-m-'+id);
+                const txt = document.getElementById('status-text-'+id);
+                const txtM = document.getElementById('status-text-m-'+id);
+                
+                const activeTxt = '<?= lang('App.active') ?>';
+                const inactiveTxt = '<?= lang('App.inactive') ?>';
+
+                // Sync both switches
+                if (sw) sw.checked = data.active;
+                if (swM) swM.checked = data.active;
+
                 if (data.active) {
-                    badge.textContent = '<?= lang('App.active') ?>';
-                    badge.className = 'text-xs px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400';
-                    if (btn) { btn.textContent='<?= lang('App.deactivate') ?>'; btn.className = btn.className.replace('emerald','orange'); }
+                    if (txt) { txt.textContent = activeTxt; txt.classList.remove('text-slate-400'); txt.classList.add('text-emerald-500'); }
+                    if (txtM) { txtM.textContent = activeTxt; txtM.classList.remove('text-slate-400'); txtM.classList.add('text-emerald-500'); }
                 } else {
-                    badge.textContent = '<?= lang('App.inactive') ?>';
-                    badge.className = 'text-xs px-2 py-0.5 rounded-lg bg-red-500/20 text-red-400';
-                    if (btn) { btn.textContent='<?= lang('App.activate') ?>'; btn.className = btn.className.replace('orange','emerald'); }
+                    if (txt) { txt.textContent = inactiveTxt; txt.classList.remove('text-emerald-500'); txt.classList.add('text-slate-400'); }
+                    if (txtM) { txtM.textContent = inactiveTxt; txtM.classList.remove('text-emerald-500'); txtM.classList.add('text-slate-400'); }
                 }
                 Toast.fire({ icon: 'success', title: data.message });
             })

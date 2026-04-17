@@ -111,8 +111,8 @@
         
         <!-- Logo Section -->
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">CashFlow</h1>
-            <p class="text-slate-500 dark:text-slate-400 font-medium mt-2">Smart Personal Finance.</p>
+            <img src="<?= base_url('logo1.png') ?>" alt="CashFlow Logo" class="h-16 mx-auto mb-2">
+            <p class="text-slate-500 dark:text-slate-400 font-medium">Smart Personal Finance.</p>
         </div>
 
         <!-- Glass Card -->
@@ -187,12 +187,26 @@
             </div>
         </div>
 
-        <!-- Demo Account Hint -->
-        <div class="mt-6 text-center">
-            <button onclick="fillDemo()" class="text-xs text-slate-400 dark:text-slate-500 hover:text-brand-400 transition-colors">
-                <?= lang('App.demo_hint') ?>: <span class="font-semibold text-slate-600 dark:text-slate-300">admin / admin123</span> (<?= lang('App.click_to_fill') ?>)
-            </button>
+        <!-- Branding Footer -->
+        <div class="mt-8 text-center">
+            <a href="https://appsbee.my.id" target="_blank" class="group relative inline-flex items-center justify-center text-[10px] uppercase font-bold tracking-[0.4em] transition-all duration-500 h-4 min-w-[180px]">
+                <span class="absolute inset-0 flex items-center justify-center transition-all duration-500 group-hover:opacity-0 group-hover:scale-95 animate-shimmer-brand bg-[linear-gradient(to_right,#64748b_20%,#10b981_40%,#10b981_60%,#64748b_80%)] bg-[length:200%_auto] bg-clip-text text-transparent">
+                    appsbee 2026
+                </span>
+                <span class="absolute inset-0 flex items-center justify-center opacity-0 scale-110 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 text-emerald-400 whitespace-nowrap">
+                    visit website
+                </span>
+            </a>
         </div>
+
+        <style>
+            @keyframes shimmer {
+                to { background-position: 200% center; }
+            }
+            .animate-shimmer-brand {
+                animation: shimmer 3s linear infinite;
+            }
+        </style>
 
     </main>
 
@@ -213,14 +227,7 @@
             setTimeout(() => toggleIcon.style.transform = 'scale(1)', 100);
         });
 
-        // Demo Filler
-        function fillDemo() {
-            document.getElementById('login').value = 'admin';
-            passwordInput.value = 'admin123';
-            // Trigger input event to update label colors if needed
-            document.getElementById('login').dispatchEvent(new Event('input'));
-            passwordInput.dispatchEvent(new Event('input'));
-        }
+
 
         // Form Submit Loading State Integration (Optional but good UX)
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -233,15 +240,16 @@
 
         // Flash Messages using SweetAlert2
         document.addEventListener('DOMContentLoaded', function() {
+            const isDark = document.documentElement.classList.contains('dark');
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 4000,
                 timerProgressBar: true,
-                background: '#1e293b', // slate-800
-                color: '#f8fafc', // slate-50
-                iconColor: '#10b981', // brand-500
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#1e293b',
+                iconColor: '#10b981',
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
                     toast.addEventListener('mouseleave', Swal.resumeTimer)

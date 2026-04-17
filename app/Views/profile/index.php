@@ -5,7 +5,7 @@
 
 <div class="w-full space-y-4">
     <!-- Header Card with Avatar -->
-    <div class="bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-300 dark:border-slate-600 rounded-2xl p-4">
+    <div class="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 border border-emerald-500/20 rounded-2xl p-6 shadow-xl shadow-emerald-500/10">
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
             <!-- Avatar Upload -->
             <div class="relative flex-shrink-0">
@@ -74,21 +74,21 @@
                 <div class="sm:col-span-2">
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Nama Lengkap <span class="text-red-400">*</span></label>
                     <input name="full_name" type="text" value="<?= esc($u['full_name'] ?? '') ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500" required>
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium" required>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Email <span class="text-red-400">*</span></label>
                     <input name="email" type="email" value="<?= esc($u['email'] ?? '') ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500" required>
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium" required>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.phone_number') ?></label>
                     <input name="phone_number" type="tel" value="<?= esc($u['phone_number'] ?? '') ?>" placeholder="08xxx"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500">
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.gender') ?></label>
-                    <select name="gender" class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500">
+                    <select name="gender" class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium">
                         <option value=""><?= lang('App.select_option') ?></option>
                         <option value="male"   <?= ($u['gender']??'') === 'male'   ? 'selected' : '' ?>><?= lang('App.male') ?></option>
                         <option value="female" <?= ($u['gender']??'') === 'female' ? 'selected' : '' ?>><?= lang('App.female') ?></option>
@@ -98,32 +98,32 @@
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.date_of_birth') ?></label>
                     <input name="date_of_birth" type="date" value="<?= esc($u['date_of_birth'] ?? '') ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500">
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium">
                 </div>
                 <div class="sm:col-span-2">
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.address') ?></label>
                     <textarea name="address" rows="2" placeholder="<?= lang('App.address_placeholder') ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 resize-none"><?= esc($u['address'] ?? '') ?></textarea>
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium resize-none"><?= esc($u['address'] ?? '') ?></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.city') ?></label>
                     <input name="city" type="text" value="<?= esc($u['city'] ?? '') ?>" placeholder="Jakarta"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500">
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.province') ?></label>
                     <input name="province" type="text" value="<?= esc($u['province'] ?? '') ?>" placeholder="DKI Jakarta"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500">
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.postal_code') ?></label>
                     <input name="postal_code" type="text" value="<?= esc($u['postal_code'] ?? '') ?>" placeholder="10220"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500">
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium">
                 </div>
                 <div class="sm:col-span-2">
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.bio') ?></label>
                     <textarea name="bio" rows="2" placeholder="<?= lang('App.bio_placeholder') ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 resize-none"><?= esc($u['bio'] ?? '') ?></textarea>
+                        class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium resize-none"><?= esc($u['bio'] ?? '') ?></textarea>
                 </div>
             </div>
         </div>

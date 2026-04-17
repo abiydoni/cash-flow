@@ -46,6 +46,28 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('category',              'Category::index');
     $routes->post('category/store',       'Category::store');
     $routes->post('category/delete/(:num)','Category::delete/$1');
+
+    // Dues (Authenticated users)
+    $routes->get('dues',                'Dues::index');
+    $routes->get('dues/type/(:num)',    'Dues::type/$1');
+    $routes->get('dues/member/(:num)',  'Dues::detail/$1');
+    $routes->post('dues/pay',           'Dues::pay');
+    $routes->post('dues/delete/(:num)', 'Dues::delete/$1');
+
+    // Members (Per User)
+    $routes->get('member',               'Member::index');
+    $routes->post('member/store',        'Member::store');
+    $routes->post('member/delete/(:num)','Member::delete/$1');
+    $routes->post('member/toggle/(:num)','Member::toggle/$1');
+
+    // Dues Types (Per User)
+    $routes->get('duestype',               'DuesType::index');
+    $routes->post('duestype/store',        'DuesType::store');
+    $routes->post('duestype/delete/(:num)','DuesType::delete/$1');
+
+    // Reports
+    $routes->get('report',                 'Report::index');
+    $routes->get('report/month/(:num)/(:num)', 'Report::viewMonth/$1/$2');
 });
 
 // ─── ADMIN ROUTES ─────────────────────────────────────────────────────────────
@@ -59,4 +81,10 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('categories',              'Admin::categories');
     $routes->post('categories/store',       'Admin::storeCategory');
     $routes->post('categories/delete/(:num)', 'Admin::deleteCategory/$1');
+
+    // Settings & Reset
+    $routes->get('settings',                'Settings::index');
+    $routes->get('settings/backup',         'Settings::backup');
+    $routes->post('settings/notifications', 'Settings::updateNotifications');
+    $routes->post('settings/reset',         'Settings::resetData');
 });

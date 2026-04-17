@@ -5,6 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta name="description" content="CashFlow - Aplikasi Manajemen Keuangan Pribadi">
     <title><?= $title ?? 'CashFlow' ?> | CashFlow App</title>
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="icon" type="image/png" href="<?= base_url('favicon.png') ?>">
+    <link rel="manifest" href="<?= base_url('manifest.json') ?>">
+    <meta name="theme-color" content="#10b981">
+    
+    <script>
+        let deferredPrompt;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('<?= base_url('sw.js') ?>')
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.log('SW Failed', err));
+            });
+        }
+
+        // PWA Installation Logic
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Show only on mobile/small screens
+            const isMobile = window.innerWidth < 1024; // Including tablets
+            if (!isMobile) return;
+
+            // Show the install banner with animation
+            const banner = document.getElementById('installBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                setTimeout(() => {
+                    banner.classList.remove('hidden');
+                    setTimeout(() => {
+                        banner.classList.remove('translate-y-full', 'opacity-0');
+                    }, 50);
+                }, 10);
+            }
+        });
+
+        async function installApp() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('App installed');
+            }
+            hideInstallBanner();
+            deferredPrompt = null;
+        }
+
+        function hideInstallBanner() {
+            const banner = document.getElementById('installBanner');
+            if (banner) {
+                banner.classList.add('translate-y-full', 'opacity-0');
+                setTimeout(() => banner.classList.add('hidden'), 500);
+            }
+        }
+    </script>
+    
+
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +95,7 @@
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
@@ -51,6 +109,22 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; }
+            main { margin: 0 !important; padding: 0 !important; }
+            .sidebar { display: none !important; }
+            header { display: none !important; }
+            
+            /* Fix cutoff issues */
+            html, body { height: auto !important; overflow: visible !important; }
+            .flex, .h-screen, .overflow-hidden, .overflow-y-auto { 
+                height: auto !important; 
+                overflow: visible !important; 
+                display: block !important; 
+            }
+        }
         .sidebar-link {
             display: flex; align-items: center; gap: 0.75rem;
             padding: 0.6rem 0.875rem; border-radius: 0.6rem;
@@ -96,7 +170,7 @@
 <div class="flex h-screen overflow-hidden">
 
     <!-- ─── SIDEBAR (Desktop) ──────────────────────────────────────────────── -->
-    <aside id="sidebar" class="hidden lg:flex flex-col w-64 bg-slate-50 border-r border-slate-200 dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-900 dark:border-slate-700 flex-shrink-0">
+    <aside id="sidebar" class="hidden lg:flex flex-col w-64 bg-slate-50 border-r border-slate-200 dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-900 dark:border-slate-700 flex-shrink-0 no-print">
         <!-- Logo -->
         <div class="p-4 border-b border-slate-200 dark:border-slate-700">
             <a href="<?= base_url('dashboard') ?>" class="flex items-center gap-3">
@@ -105,7 +179,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold text-slate-800 dark:text-white leading-tight">CashFlow</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Manajemen Keuangan</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400"><?= lang('App.financial_mgmt') ?></p>
                 </div>
             </a>
         </div>
@@ -129,7 +203,7 @@
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto py-4 px-3">
-            <p class="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Menu Utama</p>
+            <p class="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2"><?= lang('App.main_menu') ?></p>
 
             <a href="<?= base_url('dashboard') ?>" class="sidebar-link <?= uri_string() === 'dashboard' ? 'active' : '' ?>">
                 <ion-icon name="grid-outline"></ion-icon> <?= lang('App.dashboard') ?>
@@ -147,6 +221,18 @@
             <a href="<?= base_url('category') ?>" class="sidebar-link <?= (uri_string() === 'category') ? 'active' : '' ?>">
                 <ion-icon name="pricetags-outline"></ion-icon> <?= lang('App.category') ?>
             </a>
+            <a href="<?= base_url('dues') ?>" class="sidebar-link <?= (uri_string() === 'dues' || strpos(uri_string(), 'dues/member') !== false) ? 'active' : '' ?>">
+                <ion-icon name="calendar-outline"></ion-icon> <?= lang('App.dues') ?>
+            </a>
+            <a href="<?= base_url('member') ?>" class="sidebar-link <?= (uri_string() === 'member') ? 'active' : '' ?>">
+                <ion-icon name="people-circle-outline"></ion-icon> <?= lang('App.member') ?>
+            </a>
+            <a href="<?= base_url('duestype') ?>" class="sidebar-link <?= (uri_string() === 'duestype') ? 'active' : '' ?>">
+                <ion-icon name="card-outline"></ion-icon> <?= lang('App.dues_type') ?>
+            </a>
+            <a href="<?= base_url('report') ?>" class="sidebar-link <?= (uri_string() === 'report') ? 'active' : '' ?>">
+                <ion-icon name="analytics-outline"></ion-icon> <?= lang('App.reports') ?>
+            </a>
 
             <?php if (session('role') === 'admin'): ?>
             <p class="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-4 mb-2"><?= lang('App.admin') ?></p>
@@ -159,13 +245,16 @@
             <a href="<?= base_url('admin/categories') ?>" class="sidebar-link <?= strpos(uri_string(), 'admin/categories') !== false ? 'active' : '' ?>">
                 <ion-icon name="pricetags-outline"></ion-icon> <?= lang('App.category') ?>
             </a>
+            <a href="<?= base_url('admin/settings') ?>" class="sidebar-link <?= strpos(uri_string(), 'admin/settings') !== false ? 'active' : '' ?>">
+                <ion-icon name="settings-outline"></ion-icon> <?= lang('App.settings') ?>
+            </a>
             <?php endif; ?>
 
             <p class="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-4 mb-2"><?= lang('App.account') ?></p>
             <a href="<?= base_url('profile') ?>" class="sidebar-link <?= strpos(uri_string(), 'profile') !== false ? 'active' : '' ?>">
                 <ion-icon name="person-outline"></ion-icon> <?= lang('App.my_profile') ?>
             </a>
-            <a href="<?= base_url('auth/logout') ?>" onclick="confirmLogout(event)" class="sidebar-link text-red-400 hover:bg-red-500/10 hover:text-red-300">
+            <a href="<?= base_url('auth/logout') ?>" onclick="confirmLogout(event)" class="sidebar-link text-red-400 hover:bg-red-500/10 hover:text-red-300 no-loading">
                 <ion-icon name="log-out-outline"></ion-icon> <?= lang('App.logout') ?>
             </a>
         </nav>
@@ -175,7 +264,7 @@
     <div class="flex-1 flex flex-col overflow-hidden">
 
         <!-- Top Bar -->
-        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-2 flex items-center justify-between flex-shrink-0">
+        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-2 flex items-center justify-between flex-shrink-0 no-print">
             <div class="flex items-center gap-3">
                 <button id="sidebarToggle" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-white hover:bg-slate-100 dark:bg-slate-700 transition-colors" onclick="toggleMobileSidebar()">
                     <ion-icon name="menu-outline" class="text-2xl"></ion-icon>
@@ -248,15 +337,20 @@
                 <a href="<?= base_url('transaction/create?type=income') ?>" class="sidebar-link <?= (uri_string() === 'transaction/create' && service('request')->getGet('type') === 'income') ? 'active' : '' ?>" onclick="toggleMobileSidebar()"><ion-icon name="trending-up-outline"></ion-icon> <?= lang('App.income') ?></a>
                 <a href="<?= base_url('transaction/create?type=expense') ?>" class="sidebar-link <?= (uri_string() === 'transaction/create' && service('request')->getGet('type') === 'expense') ? 'active' : '' ?>" onclick="toggleMobileSidebar()"><ion-icon name="trending-down-outline"></ion-icon> <?= lang('App.expense') ?></a>
                 <a href="<?= base_url('category') ?>" class="sidebar-link <?= (uri_string() === 'category') ? 'active' : '' ?>" onclick="toggleMobileSidebar()"><ion-icon name="pricetags-outline"></ion-icon> <?= lang('App.category') ?></a>
+                <a href="<?= base_url('dues') ?>" class="sidebar-link <?= (uri_string() === 'dues') ? 'active' : '' ?>" onclick="toggleMobileSidebar()"><ion-icon name="calendar-outline"></ion-icon> <?= lang('App.dues') ?></a>
+                <a href="<?= base_url('member') ?>" class="sidebar-link <?= (uri_string() === 'member') ? 'active' : '' ?>" onclick="toggleMobileSidebar()"><ion-icon name="people-circle-outline"></ion-icon> <?= lang('App.member') ?></a>
+                <a href="<?= base_url('duestype') ?>" class="sidebar-link <?= (uri_string() === 'duestype') ? 'active' : '' ?>" onclick="toggleMobileSidebar()"><ion-icon name="card-outline"></ion-icon> <?= lang('App.dues_type') ?></a>
+                <a href="<?= base_url('report') ?>" class="sidebar-link <?= (uri_string() === 'report') ? 'active' : '' ?>" onclick="toggleMobileSidebar()"><ion-icon name="analytics-outline"></ion-icon> <?= lang('App.reports') ?></a>
                 <?php if (session('role') === 'admin'): ?>
                 <p class="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-4 mb-2"><?= lang('App.admin') ?></p>
                 <a href="<?= base_url('admin/users') ?>" class="sidebar-link" onclick="toggleMobileSidebar()"><ion-icon name="people-outline"></ion-icon> <?= lang('App.manage_users') ?></a>
                 <a href="<?= base_url('admin/transactions') ?>" class="sidebar-link" onclick="toggleMobileSidebar()"><ion-icon name="list-outline"></ion-icon> <?= lang('App.all_transactions') ?></a>
                 <a href="<?= base_url('admin/categories') ?>" class="sidebar-link" onclick="toggleMobileSidebar()"><ion-icon name="pricetags-outline"></ion-icon> <?= lang('App.category') ?></a>
+                <a href="<?= base_url('admin/settings') ?>" class="sidebar-link" onclick="toggleMobileSidebar()"><ion-icon name="settings-outline"></ion-icon> <?= lang('App.settings') ?></a>
                 <?php endif; ?>
                 <p class="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-4 mb-2"><?= lang('App.account') ?></p>
                 <a href="<?= base_url('profile') ?>" class="sidebar-link" onclick="toggleMobileSidebar()"><ion-icon name="person-outline"></ion-icon> <?= lang('App.my_profile') ?></a>
-                <a href="<?= base_url('auth/logout') ?>" onclick="confirmLogout(event)" class="sidebar-link text-red-400"><ion-icon name="log-out-outline"></ion-icon> <?= lang('App.logout') ?></a>
+                <a href="<?= base_url('auth/logout') ?>" onclick="confirmLogout(event)" class="sidebar-link text-red-400 no-loading"><ion-icon name="log-out-outline"></ion-icon> <?= lang('App.logout') ?></a>
             </nav>
         </div>
 
@@ -282,7 +376,7 @@
 
             <?php if (session()->getFlashdata('errors')): ?>
             <div class="mb-4 bg-red-500/20 border border-red-500/40 text-red-300 px-4 py-3 rounded-xl">
-                <div class="flex items-center gap-2 mb-2"><ion-icon name="alert-circle-outline"></ion-icon><span class="font-semibold text-sm">Terdapat kesalahan:</span></div>
+                <div class="flex items-center gap-2 mb-2"><ion-icon name="alert-circle-outline"></ion-icon><span class="font-semibold text-sm"><?= lang('App.error_occurred') ?>:</span></div>
                 <ul class="list-disc list-inside text-sm space-y-1">
                     <?php foreach (session()->getFlashdata('errors') as $e): ?>
                         <li><?= esc($e) ?></li>
@@ -297,7 +391,7 @@
 </div>
 
 <!-- ─── BOTTOM NAVIGATION (Mobile) ────────────────────────────────────────── -->
-<nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 z-30">
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 z-30 no-print">
     <div class="flex items-center justify-around py-1.5">
         <a href="<?= base_url('dashboard') ?>" class="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg <?= uri_string() === 'dashboard' ? 'text-emerald-400' : 'text-slate-500 dark:text-slate-400' ?>">
             <ion-icon name="<?= uri_string() === 'dashboard' ? 'grid' : 'grid-outline' ?>"></ion-icon>
@@ -350,17 +444,18 @@ function toggleTheme() {
 
 function confirmLogout(e) {
     e.preventDefault();
+    const isDark = document.documentElement.classList.contains('dark');
     Swal.fire({
         title: '<?= lang('App.logout') ?>?',
         text: '<?= lang('App.logout_confirm') ?>',
-        icon: 'question',
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#64748b',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#ef4444',
         confirmButtonText: '<?= lang('App.logout_yes') ?>',
         cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b',
-        color: '#f1f5f9',
+        background: isDark ? '#1e293b' : '#ffffff',
+        color: isDark ? '#f1f5f9' : '#1e293b',
     }).then((result) => {
         if (result.isConfirmed) window.location = '<?= base_url('auth/logout') ?>';
     });
@@ -374,13 +469,29 @@ setTimeout(() => {
     });
 }, 5000);
 
-// SweetAlert default theme
-const Toast = Swal.mixin({
-    toast: true, position: 'top-end', showConfirmButton: false,
-    timer: 3000, timerProgressBar: true,
-    background: '#1e293b', color: '#f1f5f9',
-});
-window.Toast = Toast;
+// SweetAlert Global Theme Helper
+function getSwalConfig(isToast = true) {
+    const isDark = document.documentElement.classList.contains('dark');
+    const config = {
+        background: isDark ? '#1e293b' : '#ffffff',
+        color: isDark ? '#f1f5f9' : '#1e1e1e',
+        iconColor: '#10b981',
+    };
+    if (isToast) {
+        return {
+            ...config,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+        };
+    }
+    return config;
+}
+
+// Global Toast instance
+window.Toast = Swal.mixin(getSwalConfig(true));
 </script>
 
 <!-- Master Loading Overlay -->
@@ -443,6 +554,39 @@ window.addEventListener('pageshow', (event) => {
 
 <?= $this->renderSection('scripts') ?>
 
-<script>hideLoading(); // Force hide on boot</script>
+    <!-- PWA Install Banner (Floating) -->
+    <div id="installBanner" style="display: none;" class="fixed bottom-20 left-4 right-4 z-[60] hidden opacity-0 translate-y-full transition-all duration-500 ease-out no-print">
+        <div class="bg-slate-900/90 backdrop-blur-xl border border-white/10 p-4 rounded-[2rem] shadow-2xl flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 overflow-hidden">
+                    <img src="<?= base_url('logo1.png') ?>" alt="Logo" class="w-8 h-8 object-contain">
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white leading-tight"><?= lang('App.pwa_install_title') ?></h4>
+                    <p class="text-[10px] text-slate-400"><?= lang('App.pwa_install_desc') ?></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="hideInstallBanner()" class="p-2 text-slate-400 hover:text-white transition-colors">
+                    <ion-icon name="close-outline" class="text-xl"></ion-icon>
+                </button>
+                <button onclick="installApp()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs transition-transform active:scale-95 animate-pulse-glow">
+                    <?= lang('App.pwa_install_btn') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse-emerald-glow {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2); }
+            50% { transform: scale(1.1); box-shadow: 0 0 25px 8px rgba(16, 185, 129, 0.4); }
+        }
+        .animate-pulse-glow {
+            animation: pulse-emerald-glow 1.5s ease-in-out infinite;
+        }
+    </style>
+
+    <script>hideLoading(); // Force hide on boot</script>
 </body>
 </html>

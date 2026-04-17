@@ -74,7 +74,7 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
         $totalOut = array_sum(array_map(fn($t) => $t['type']==='expense' ? $t['amount'] : 0, $transactions));
         ?>
         <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-3 text-xs">
-            <span class="text-slate-500 dark:text-slate-400"><?= count($transactions) ?> transaksi</span>
+            <span class="text-slate-500 dark:text-slate-400"><?= lang('App.total_transactions', [count($transactions)]) ?></span>
             <span class="text-emerald-400 font-semibold">+<?= rupiah($totalIn) ?></span>
             <span class="text-red-400 font-semibold">-<?= rupiah($totalOut) ?></span>
             <span class="ml-auto font-bold <?= $totalIn-$totalOut >= 0 ? 'text-emerald-300' : 'text-red-300' ?>"><?= rupiah($totalIn-$totalOut) ?></span>
@@ -112,7 +112,9 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
                             <?= $types[$tx['type']]['label'] ?? $tx['type'] ?>
                         </span>
                     </div>
-
+                    <button onclick="deleteTx(<?= $tx['id'] ?>)" class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
+                        <ion-icon name="trash-outline" class="text-sm"></ion-icon>
+                    </button>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -135,13 +137,13 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
 <script>
 function deleteTx(id) {
     Swal.fire({
-        title: 'Hapus Transaksi?',
-        text: 'Transaksi ini akan dihapus permanen.',
+        title: '<?= lang('App.confirm_delete_transaction_title') ?>',
+        text: '<?= lang('App.confirm_delete_transaction_text') ?>',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef4444',
         cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.delete_yes') ?>',
+        confirmButtonText: '<?= lang('App.yes_delete') ?>',
         cancelButtonText: '<?= lang('App.cancel') ?>',
         background: '#1e293b',
         color: '#f1f5f9',
@@ -161,7 +163,7 @@ function deleteTx(id) {
                 })
                 .catch(err => {
                     hideLoading();
-                    Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' });
+                    Toast.fire({ icon: 'error', title: '<?= lang('App.error_occurred') ?>' });
                 });
         }
     });
