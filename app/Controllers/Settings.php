@@ -8,6 +8,7 @@ use App\Models\DuesPaymentModel;
 use App\Models\DuesTypeModel;
 use App\Models\MemberModel;
 use App\Models\TransactionModel;
+use App\Models\SettingModel;
 
 class Settings extends BaseController
 {
@@ -17,7 +18,7 @@ class Settings extends BaseController
             return redirect()->to('/dashboard')->with('error', lang('App.access_denied'));
         }
 
-        $settingModel = new \App\Models\SettingModel();
+        $settingModel = new SettingModel();
         return view('settings/index', [
             'title' => lang('App.settings'),
             'settings' => $settingModel->getAllSettings()
@@ -31,7 +32,6 @@ class Settings extends BaseController
         }
 
         $db = \Config\Database::connect();
-        $dbname = $db->getDatabase();
         $tables = $db->listTables();
         
         $output = "-- CashFlow Database Backup\n";
@@ -39,12 +39,10 @@ class Settings extends BaseController
         $output .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
 
         foreach ($tables as $table) {
-            // Structure
             $query = $db->query("SHOW CREATE TABLE `$table`")->getRowArray();
             $output .= "DROP TABLE IF EXISTS `$table`;\n";
             $output .= $query['Create Table'] . ";\n\n";
 
-            // Data
             $rows = $db->table($table)->get()->getResultArray();
             foreach ($rows as $row) {
                 $keys = array_keys($row);
@@ -74,7 +72,7 @@ class Settings extends BaseController
             return redirect()->to('/dashboard')->with('error', lang('App.access_denied'));
         }
 
-        $settingModel = new \App\Models\SettingModel();
+        $settingModel = new SettingModel();
         
         $settingModel->setVal('wa_gateway_url', $this->request->getPost('wa_gateway_url') ?? '');
         $settingModel->setVal('wa_api_key', $this->request->getPost('wa_api_key') ?? '');
