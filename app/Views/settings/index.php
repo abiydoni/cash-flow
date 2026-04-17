@@ -42,7 +42,7 @@
                     </div>
 
                     <div class="mt-10 pt-10 border-t border-slate-100 dark:border-slate-700">
-                        <form action="<?= base_url('settings/reset') ?>" method="POST" id="resetForm" class="space-y-6">
+                        <form action="<?= base_url('admin/settings/reset') ?>" method="POST" id="resetForm" class="space-y-6">
                             <?= csrf_field() ?>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
