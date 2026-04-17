@@ -81,7 +81,7 @@ class Settings extends BaseController
         $settingModel->setVal('notif_enabled', $this->request->getPost('notif_enabled') ? '1' : '0');
         $settingModel->setVal('app_name', $this->request->getPost('app_name') ?? 'CashFlow');
 
-        return redirect()->to('/settings')->with('success', lang('App.settings_updated'));
+        return redirect()->to('/admin/settings')->with('success', lang('App.settings_updated'));
     }
 
     public function resetData()
@@ -97,33 +97,23 @@ class Settings extends BaseController
 
         $db = \Config\Database::connect();
         
-        // Disable foreign key checks to allow full truncation
         $db->query('SET FOREIGN_KEY_CHECKS=0');
         
         $db->transStart();
-
-        // 1. Reset Financial Data
         $db->table('transactions')->where('id >', 0)->delete();
         $db->table('dues_payments')->where('id >', 0)->delete();
         $db->table('budgets')->where('id >', 0)->delete();
         $db->table('dues_types')->where('id >', 0)->delete();
         $db->table('members')->where('id >', 0)->delete();
-
-        // 2. Reset Categories (Keep system categories, delete user custom)
         $db->table('categories')->where('user_id IS NOT NULL', null, false)->delete();
-
-        // 3. Optional: Reset Profiles for non-admin users if you want total cleanup
-        // $db->table('profiles')->where('user_id !=', $sessionUserId)->delete();
-
         $db->transComplete();
         
-        // Re-enable foreign key checks
         $db->query('SET FOREIGN_KEY_CHECKS=1');
 
         if ($db->transStatus() === false) {
-            return redirect()->back()->with('error', lang('App.reset_failed'));
+            return redirect()->to('/admin/settings')->with('error', lang('App.reset_failed'));
         }
 
-        return redirect()->to('/settings')->with('success', lang('App.reset_success'));
+        return redirect()->to('/admin/settings')->with('success', lang('App.reset_success'));
     }
 }
