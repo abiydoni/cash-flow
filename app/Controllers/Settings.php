@@ -96,38 +96,29 @@ class Settings extends BaseController
         }
 
         $db = \Config\Database::connect();
+        
+        // Disable foreign key checks to allow full truncation
+        $db->query('SET FOREIGN_KEY_CHECKS=0');
+        
         $db->transStart();
 
-        // 1. Reset Transactions
+        // 1. Reset Financial Data
         $db->table('transactions')->truncate();
-
-        // 2. Reset Dues Payments
         $db->table('dues_payments')->truncate();
-
-        // 3. Reset Budgets
         $db->table('budgets')->truncate();
+        $db->table('dues_types')->truncate();
+        $db->table('members')->truncate();
 
-        // 4. Reset Members
-        // TRUNCATE is better but if there are foreign keys we might need DELETE
-        try {
-            $db->table('members')->truncate();
-        } catch (\Exception $e) {
-            $db->table('members')->where('id >', 0)->delete();
-        }
-
-        // 5. Reset Categories (Custom only)
-        // Keep categories where user_id is NULL (System categories)
+        // 2. Reset Categories (Keep system categories, delete user custom)
         $db->table('categories')->where('user_id IS NOT NULL', null, false)->delete();
 
-        // 6. Reset Dues Types? 
-        // Usually these are custom setup, so reset them too
-        try {
-            $db->table('dues_types')->truncate();
-        } catch (\Exception $e) {
-            $db->table('dues_types')->where('id >', 0)->delete();
-        }
+        // 3. Optional: Reset Profiles for non-admin users if you want total cleanup
+        // $db->table('profiles')->where('user_id !=', $sessionUserId)->delete();
 
         $db->transComplete();
+        
+        // Re-enable foreign key checks
+        $db->query('SET FOREIGN_KEY_CHECKS=1');
 
         if ($db->transStatus() === false) {
             return redirect()->back()->with('error', lang('App.reset_failed'));
