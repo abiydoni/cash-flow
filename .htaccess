@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # 1. Pastikan server mengenali tipe WebP
+    AddType image/webp .webp
+
+    # 2. Jika user meminta file gambar (termasuk .webp), CSS, atau JS, arahkan langsung ke folder public
+    # Ini memperbaiki gambar profil yang mati
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*\.(webp|jpg|jpeg|png|gif|svg|ico|css|js|woff|woff2|ttf|otf))$ public/$1 [L,NC]
+
+    # 3. Sisanya, arahkan ke mesin utama aplikasi (index.php)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/index.php/$1 [L,QSA]
+</IfModule>
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php83” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
