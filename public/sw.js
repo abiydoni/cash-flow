@@ -51,12 +51,18 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             const fetchPromise = fetch(event.request).then((networkResponse) => {
-                // Cache successful responses from same origin
-                if (networkResponse && networkResponse.status === 200 && networkResponse.url.startsWith(self.location.origin)) {
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, networkResponse.clone());
-                    });
+                // Return if invalid response
+                if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                    return networkResponse;
                 }
+
+                // CLONE FIRST before returning or using anyway else
+                const responseToCache = networkResponse.clone();
+                
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseToCache);
+                });
+                
                 return networkResponse;
             });
             return cachedResponse || fetchPromise;
