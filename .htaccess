@@ -5,13 +5,14 @@
     AddType image/webp .webp
 
     # 2. Jika user meminta file gambar (termasuk .webp), CSS, atau JS, arahkan langsung ke folder public
-    # Ini memperbaiki gambar profil yang mati
+    # Ini memperbaiki gambar profil dan file PWA (manifest.json, sw.js)
     RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(.*\.(webp|jpg|jpeg|png|gif|svg|ico|css|js|woff|woff2|ttf|otf))$ public/$1 [L,NC]
+    RewriteRule ^(.*\.(webp|jpg|jpeg|png|gif|svg|ico|css|js|woff|woff2|ttf|otf|json|webmanifest|txt|xml))$ public/$1 [L,NC]
 
     # 3. Sisanya, arahkan ke mesin utama aplikasi (index.php)
+    # Jika request bukan untuk folder public/ dan bukan file fisik yang ada di root
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ public/index.php/$1 [L,QSA]
 </IfModule>
 

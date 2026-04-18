@@ -53,6 +53,38 @@
             deferredPrompt = null;
         }
 
+        async function shareApp() {
+            const shareData = {
+                title: 'CashFlow App',
+                text: 'Kelola keuanganmu lebih cerdas dengan CashFlow App!',
+                url: window.location.origin
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error('Error sharing:', err);
+                    }
+                }
+            } else {
+                try {
+                    await navigator.clipboard.writeText(window.location.origin);
+                    if (window.Toast) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Link disalin ke clipboard!'
+                        });
+                    } else {
+                        alert('Link disalin ke clipboard!');
+                    }
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+            }
+        }
+
         function hideInstallBanner() {
             const banner = document.getElementById('installBanner');
             if (banner) {
@@ -281,6 +313,9 @@
                 <a href="<?= base_url('lang/' . (service('request')->getLocale() === 'en' ? 'id' : 'en')) ?>" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors" title="<?= lang('App.language') ?>">
                     <span class="text-[10px] font-extrabold uppercase"><?= service('request')->getLocale() === 'en' ? 'ID' : 'EN' ?></span>
                 </a>
+                <button onclick="shareApp()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors" title="Share App">
+                    <ion-icon name="share-social-outline" class="mt-0.5"></ion-icon>
+                </button>
                 <button onclick="toggleTheme()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors" title="Toggle Mode">
                     <ion-icon name="moon-outline" class="hidden dark:block mt-0.5"></ion-icon>
                     <ion-icon name="sunny-outline" class="block dark:hidden mt-0.5"></ion-icon>
