@@ -91,7 +91,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 h-screen max-h-screen text-slate-700 dark:text-slate-200 overflow-hidden relative flex items-center justify-center p-4">
+<body class="bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-700 dark:text-slate-200 relative flex items-center justify-center p-4 py-12">
 
     <!-- Ambient Background Decorations -->
     <div class="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
