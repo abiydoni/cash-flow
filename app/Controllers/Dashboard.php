@@ -29,6 +29,8 @@ class Dashboard extends BaseController
 
         $summary   = $this->transModel->getMonthlySummary($userId, $month);
         $balance   = $summary['total_income'] - $summary['total_expense'];
+        $openingBalance = $this->transModel->getOpeningBalance($userId, $month);
+        
         $recentTx  = $this->transModel->getWithCategory($userId, ['month' => $month]);
         $recentTx  = array_slice($recentTx, 0, 10);
         $chartData = $this->transModel->getLast7DaysChart($userId);
@@ -48,14 +50,15 @@ class Dashboard extends BaseController
         }
 
         return view('dashboard/index', [
-            'month'       => $month,
-            'summary'     => $summary,
-            'balance'     => $balance,
-            'recentTx'    => $recentTx,
-            'chartData'   => $chartData,
-            'byCategory'  => $byCategory,
-            'budgets'     => $budgets,
-            'adminStats'  => $adminStats,
+            'month'          => $month,
+            'summary'        => $summary,
+            'balance'        => $balance,
+            'openingBalance' => $openingBalance,
+            'recentTx'       => $recentTx,
+            'chartData'      => $chartData,
+            'byCategory'     => $byCategory,
+            'budgets'        => $budgets,
+            'adminStats'     => $adminStats,
         ]);
     }
 }

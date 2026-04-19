@@ -61,50 +61,62 @@ function rupiah($n) {
 <?php endif; ?>
 
 <!-- Summary Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-    <!-- Balance -->
-    <div class="sm:col-span-1 <?= $balance >= 0 ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-red-500 to-rose-600' ?> rounded-2xl p-5 shadow-lg">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-white/80 text-sm font-medium"><?= lang('App.balance') ?></p>
-            <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
-                <ion-icon name="wallet-outline" class="text-slate-800 dark:text-white"></ion-icon>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <!-- Opening Balance -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-slate-500 dark:text-slate-400 text-[13px] font-medium"><?= lang('App.opening_balance') ?></p>
+            <div class="w-9 h-9 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                <ion-icon name="wallet-outline" class="text-blue-400"></ion-icon>
             </div>
         </div>
-        <p class="text-xl lg:text-2xl font-bold text-slate-800 dark:text-white break-all"><?= rupiah($balance) ?></p>
-        <p class="text-white/60 text-xs mt-1"><?= date('F Y', strtotime($currentMonth . '-01')) ?></p>
+        <p class="text-lg font-bold text-blue-400 break-all"><?= rupiah($openingBalance) ?></p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1"><?= lang('App.before') ?> <?= date('F Y', strtotime($currentMonth . '-01')) ?></p>
     </div>
 
     <!-- Income -->
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
         <div class="flex items-center justify-between mb-2">
-            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium"><?= lang('App.income') ?></p>
+            <p class="text-slate-500 dark:text-slate-400 text-[13px] font-medium"><?= lang('App.income') ?></p>
             <div class="w-9 h-9 bg-emerald-500/20 rounded-xl flex items-center justify-center">
                 <ion-icon name="trending-up-outline" class="text-emerald-400"></ion-icon>
             </div>
         </div>
-        <p class="text-xl font-bold text-emerald-400 break-all"><?= rupiah($summary['total_income']) ?></p>
-        <div class="mt-2 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+        <p class="text-lg font-bold text-emerald-400 break-all"><?= rupiah($summary['total_income']) ?></p>
+        <div class="mt-2 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
             <div class="h-full bg-emerald-400 rounded-full" style="width: <?= $summary['total_income'] > 0 ? 100 : 0 ?>%"></div>
         </div>
     </div>
 
     <!-- Expense -->
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium"><?= lang('App.expense') ?></p>
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-slate-500 dark:text-slate-400 text-[13px] font-medium"><?= lang('App.expense') ?></p>
             <div class="w-9 h-9 bg-red-500/20 rounded-xl flex items-center justify-center">
                 <ion-icon name="trending-down-outline" class="text-red-400"></ion-icon>
             </div>
         </div>
-        <p class="text-xl font-bold text-red-400 break-all"><?= rupiah($summary['total_expense']) ?></p>
+        <p class="text-lg font-bold text-red-400 break-all"><?= rupiah($summary['total_expense']) ?></p>
         <?php
         $expRatio = $summary['total_income'] > 0
             ? min(100, round(($summary['total_expense'] / $summary['total_income']) * 100))
             : 0; ?>
-        <div class="mt-2 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-            <div class="h-full <?= $expRatio > 80 ? 'bg-red-500' : 'bg-orange-400' ?> rounded-full transition-all" style="width: <?= $expRatio ?>%"></div>
+        <div class="mt-2 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div class="h-full <?= $expRatio > 80 ? 'bg-red-500' : 'bg-orange-400' ?> rounded-full" style="width: <?= $expRatio ?>%"></div>
         </div>
-        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1"><?= $expRatio ?>% <?= lang('App.expense_ratio') ?></p>
+    </div>
+
+    <!-- Total Balance -->
+    <?php $grandTotal = ($openingBalance ?? 0) + $balance; ?>
+    <div class="<?= $grandTotal >= 0 ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-red-500 to-rose-600' ?> rounded-2xl p-4 shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-white/80 text-[13px] font-medium"><?= lang('App.balance') ?> (Total)</p>
+            <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+                <ion-icon name="cash-outline" class="text-white"></ion-icon>
+            </div>
+        </div>
+        <p class="text-lg font-bold text-white break-all"><?= rupiah($grandTotal) ?></p>
+        <p class="text-white/60 text-[10px] mt-1"><?= lang('App.status') ?>: <?= $grandTotal >= 0 ? lang('App.active') : lang('App.inactive') ?></p>
     </div>
 </div>
 

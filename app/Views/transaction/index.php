@@ -76,16 +76,14 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
         $net      = $totalIn - $totalOut;
         $grandTotal = $opening + $net;
         ?>
-        <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-3 text-xs">
+        <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-3 flex-wrap">
                 <span class="text-slate-500 dark:text-slate-400"><?= lang('App.total_transactions', [count($transactions)]) ?></span>
                 <span class="text-emerald-400 font-semibold">+<?= rupiah($totalIn) ?></span>
                 <span class="text-red-400 font-semibold">-<?= rupiah($totalOut) ?></span>
             </div>
-            <div class="ml-auto flex items-center gap-2">
-                <?php if ($openingBalance !== null): ?>
-                    <span class="text-[10px] text-slate-500 dark:text-slate-400"><?= lang('App.balance') ?>:</span>
-                <?php endif; ?>
+            <div class="flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/50">
+                <span class="text-[10px] text-slate-500 dark:text-slate-400"><?= lang('App.balance') ?><?= $openingBalance !== null ? ' (Total)' : '' ?>:</span>
                 <span class="font-bold <?= $grandTotal >= 0 ? 'text-emerald-300' : 'text-red-300' ?>"><?= rupiah($grandTotal) ?></span>
             </div>
         </div>
