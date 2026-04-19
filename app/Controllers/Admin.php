@@ -60,12 +60,18 @@ class Admin extends BaseController
             'user_id' => $this->request->getGet('user_id'),
             'month'   => $this->request->getGet('month') ?? date('Y-m'),
         ];
+        
+        $userId       = $filters['user_id'] ? (int) $filters['user_id'] : null;
         $transactions = $this->transModel->getAllForAdmin($filters);
+        $openingBalance = $this->transModel->getOpeningBalance($userId, $filters['month']);
+        
         $users        = $this->userModel->findAll();
+        
         return view('admin/transactions', [
-            'transactions' => $transactions,
-            'users'        => $users,
-            'filters'      => $filters,
+            'transactions'   => $transactions,
+            'openingBalance' => $openingBalance,
+            'users'          => $users,
+            'filters'        => $filters,
         ]);
     }
 

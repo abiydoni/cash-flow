@@ -29,8 +29,11 @@ class TransactionModel extends Model
 
     public function getWithCategory(int $userId, array $filters = []): array
     {
-        $builder = $this->select('transactions.*, categories.name AS category_name, categories.icon AS category_icon, categories.color AS category_color')
+        $builder = $this->select('transactions.*, 
+                categories.name AS category_name, categories.icon AS category_icon, categories.color AS category_color,
+                dues_payments.id AS dues_payment_id')
             ->join('categories', 'categories.id = transactions.category_id', 'left')
+            ->join('dues_payments', 'dues_payments.transaction_id = transactions.id', 'left')
             ->where('transactions.user_id', $userId);
 
         if (!empty($filters['type'])) {
@@ -128,7 +131,7 @@ class TransactionModel extends Model
     /**
      * Get Opening Balance (Saldo Awal) before a specific month.
      */
-    public function getOpeningBalance(int $userId, string $month, array $filters = []): float
+    public function getOpeningBalance(?int $userId, string $month, array $filters = []): float
     {
         $builder = $this->db->table($this->table)
             ->select("
@@ -136,9 +139,12 @@ class TransactionModel extends Model
                 SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END) AS opening_balance"
             )
             ->join('categories', 'categories.id = transactions.category_id', 'left')
-            ->where('transactions.user_id', $userId)
             ->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m') <", $month)
             ->where('transactions.deleted_at', null);
+
+        if ($userId) {
+            $builder->where('transactions.user_id', $userId);
+        }
 
         if (!empty($filters['category_id'])) {
             $builder->where('transactions.category_id', $filters['category_id']);

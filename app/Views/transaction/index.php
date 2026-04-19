@@ -141,9 +141,15 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
                             <?= $types[$tx['type']]['label'] ?? $tx['type'] ?>
                         </span>
                     </div>
+                    <?php if (empty($tx['dues_payment_id'])): ?>
                     <button onclick="deleteTx(<?= $tx['id'] ?>)" class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
                         <ion-icon name="trash-outline" class="text-sm"></ion-icon>
                     </button>
+                    <?php else: ?>
+                    <div class="w-8 h-8 flex items-center justify-center text-slate-400 opacity-50" title="<?= lang('App.dues_payment') ?>">
+                        <ion-icon name="lock-closed-outline" class="text-sm"></ion-icon>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php endforeach; ?>
