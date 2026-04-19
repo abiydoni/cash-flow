@@ -124,4 +124,36 @@ class TransactionModel extends Model
 
         return $builder->orderBy('transactions.transaction_date', 'DESC')->findAll();
     }
+
+    /**
+     * Get Opening Balance (Saldo Awal) before a specific month.
+     */
+    public function getOpeningBalance(int $userId, string $month, array $filters = []): float
+    {
+        $builder = $this->db->table($this->table)
+            ->select("
+                SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END) -
+                SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END) AS opening_balance"
+            )
+            ->join('categories', 'categories.id = transactions.category_id', 'left')
+            ->where('transactions.user_id', $userId)
+            ->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m') <", $month)
+            ->where('transactions.deleted_at', null);
+
+        if (!empty($filters['category_id'])) {
+            $builder->where('transactions.category_id', $filters['category_id']);
+        }
+        if (!empty($filters['type'])) {
+            $builder->where('transactions.type', $filters['type']);
+        }
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                ->like('transactions.description', $filters['search'])
+                ->orLike('categories.name', $filters['search'])
+            ->groupEnd();
+        }
+
+        $result = $builder->get()->getRowArray();
+        return (float) ($result['opening_balance'] ?? 0);
+    }
 }

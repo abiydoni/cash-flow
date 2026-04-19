@@ -25,6 +25,7 @@ return [
     'signup_now' => 'Sign up now',
     'demo_hint' => 'Demo',
     'click_to_fill' => 'Click to fill',
+    'not_logged_in' => 'Please login first.',
 
     // Register
     'create_account' => 'Create Account',
@@ -251,6 +252,7 @@ return [
     'total_income' => 'Total Income',
     'total_expense' => 'Total Expense',
     'net_balance' => 'Net Balance',
+    'opening_balance' => 'Opening Balance',
     'dues_collected' => 'Dues Collected',
     'member_count' => 'Member Count',
     'trends' => 'Monthly Trends',

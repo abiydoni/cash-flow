@@ -27,6 +27,13 @@ class Transaction extends BaseController
         ];
 
         $transactions = $this->model->getWithCategory($userId, $filters);
+        
+        // Calculate Opening Balance if month filter is set
+        $openingBalance = null;
+        if (!empty($filters['month'])) {
+            $openingBalance = $this->model->getOpeningBalance($userId, $filters['month'], $filters);
+        }
+
         $incomeCategories  = $this->catModel->getForUser($userId, 'income');
         $expenseCategories = $this->catModel->getForUser($userId, 'expense');
 
@@ -35,6 +42,7 @@ class Transaction extends BaseController
             'filters'           => $filters,
             'incomeCategories'  => $incomeCategories,
             'expenseCategories' => $expenseCategories,
+            'openingBalance'    => $openingBalance,
         ]);
     }
 

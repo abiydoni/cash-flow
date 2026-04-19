@@ -25,6 +25,7 @@ return [
     'signup_now' => 'Daftar sekarang',
     'demo_hint' => 'Demo',
     'click_to_fill' => 'Klik untuk mengisi',
+    'not_logged_in' => 'Silakan login terlebih dahulu.',
 
     // Register
     'create_account' => 'Buat Akun',
@@ -252,6 +253,7 @@ return [
     'total_income' => 'Total Pemasukan',
     'total_expense' => 'Total Pengeluaran',
     'net_balance' => 'Saldo Bersih',
+    'opening_balance' => 'Saldo Awal',
     'dues_collected' => 'Iuran Terkumpul',
     'member_count' => 'Jumlah Anggota',
     'trends' => 'Tren Bulanan',
@@ -260,9 +262,6 @@ return [
     'grand_total' => 'Grand Total',
     'print_date' => 'Tanggal Cetak',
     'view_report' => 'Lihat Laporan',
-    'details' => 'Detail',
-    'amount' => 'Nominal',
-    'financial_report' => 'Laporan Keuangan',
     'generate_date' => 'Waktu Generate',
     'yearly_ledger' => 'Buku Besar Iuran Tahunan',
     'member_name' => 'Nama Anggota',
@@ -287,7 +286,6 @@ return [
     'total_monthly_flow' => 'Total Arus Kas Bulanan',
     'individual_dues_report' => 'Laporan Iuran Anggota',
     'monthly_dues_matrix' => 'Matriks Rekaman Iuran Bulanan',
-    'month_period' => 'Periode Bulan',
     'remaining' => 'Sisa',
     'totals_summary' => 'Ringkasan Total Seluruh Iuran',
     'paid' => 'Sudah Dibayar',

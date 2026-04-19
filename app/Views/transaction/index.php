@@ -72,15 +72,46 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
         <?php
         $totalIn  = array_sum(array_map(fn($t) => $t['type']==='income' ? $t['amount'] : 0, $transactions));
         $totalOut = array_sum(array_map(fn($t) => $t['type']==='expense' ? $t['amount'] : 0, $transactions));
+        $opening  = $openingBalance ?? 0;
+        $net      = $totalIn - $totalOut;
+        $grandTotal = $opening + $net;
         ?>
         <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-3 text-xs">
-            <span class="text-slate-500 dark:text-slate-400"><?= lang('App.total_transactions', [count($transactions)]) ?></span>
-            <span class="text-emerald-400 font-semibold">+<?= rupiah($totalIn) ?></span>
-            <span class="text-red-400 font-semibold">-<?= rupiah($totalOut) ?></span>
-            <span class="ml-auto font-bold <?= $totalIn-$totalOut >= 0 ? 'text-emerald-300' : 'text-red-300' ?>"><?= rupiah($totalIn-$totalOut) ?></span>
+            <div class="flex items-center gap-3 flex-wrap">
+                <span class="text-slate-500 dark:text-slate-400"><?= lang('App.total_transactions', [count($transactions)]) ?></span>
+                <span class="text-emerald-400 font-semibold">+<?= rupiah($totalIn) ?></span>
+                <span class="text-red-400 font-semibold">-<?= rupiah($totalOut) ?></span>
+            </div>
+            <div class="ml-auto flex items-center gap-2">
+                <?php if ($openingBalance !== null): ?>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400"><?= lang('App.balance') ?>:</span>
+                <?php endif; ?>
+                <span class="font-bold <?= $grandTotal >= 0 ? 'text-emerald-300' : 'text-red-300' ?>"><?= rupiah($grandTotal) ?></span>
+            </div>
         </div>
 
         <div class="divide-y divide-slate-200 dark:divide-slate-700/50">
+            <!-- Saldo Awal Row -->
+            <?php if ($openingBalance !== null): ?>
+            <div class="flex items-center gap-2 p-3 bg-blue-500/5 border-b border-slate-200 dark:border-slate-700/50">
+                <!-- Icon -->
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-blue-500/10">
+                    <ion-icon name="wallet-outline" class="text-blue-400" style="font-size:1.1rem;"></ion-icon>
+                </div>
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                    <p class="text-[13px] font-bold text-slate-800 dark:text-white truncate"><?= lang('App.opening_balance') ?></p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400"><?= lang('App.balance') ?> <?= lang('App.before') ?> <?= date('M Y', strtotime($filters['month'])) ?></p>
+                </div>
+                <!-- Amount -->
+                <div class="text-right">
+                    <p class="text-[13px] font-bold text-blue-400">
+                        <?= rupiah($openingBalance) ?>
+                    </p>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <?php foreach ($transactions as $tx): ?>
             <div class="flex items-center gap-2 p-2 hover:bg-slate-700/30 transition-colors" id="tx-<?= $tx['id'] ?>">
                 <!-- Icon -->
