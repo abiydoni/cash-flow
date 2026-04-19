@@ -28,10 +28,16 @@
 </div>
 
 <?php
-$totalIn  = array_sum(array_map(fn($t) => $t['type']==='income'  ? $t['amount'] : 0, $transactions));
-$totalOut = array_sum(array_sum(array_map(fn($t) => $t['type']==='expense' ? $t['amount'] : 0, $transactions))); // wait, fixed the array_sum error in original mapping
-$totalOut = 0; foreach($transactions as $t) if($t['type']==='expense') $totalOut += $t['amount'];
-$net      = $totalIn - $totalOut;
+$totalIn  = 0;
+$totalOut = 0;
+foreach ($transactions as $t) {
+    if ($t['type'] === 'income') {
+        $totalIn += $t['amount'];
+    } else {
+        $totalOut += $t['amount'];
+    }
+}
+$net        = $totalIn - $totalOut;
 $grandTotal = ($openingBalance ?? 0) + $net;
 ?>
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
