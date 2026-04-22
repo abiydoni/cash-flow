@@ -27,9 +27,9 @@ class TransactionModel extends Model
         'transaction_date' => 'required|valid_date',
     ];
 
-    public function getWithCategory(int $userId, array $filters = []): array
+    public function getWithCategory(int $userId, array $filters = [], int $perPage = null)
     {
-        $builder = $this->select('transactions.*, 
+        $this->select('transactions.*, 
                 categories.name AS category_name, categories.icon AS category_icon, categories.color AS category_color,
                 dues_payments.id AS dues_payment_id')
             ->join('categories', 'categories.id = transactions.category_id', 'left')
@@ -37,24 +37,29 @@ class TransactionModel extends Model
             ->where('transactions.user_id', $userId);
 
         if (!empty($filters['type'])) {
-            $builder->where('transactions.type', $filters['type']);
+            $this->where('transactions.type', $filters['type']);
         }
         if (!empty($filters['month'])) {
-            $builder->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m')", $filters['month']);
+            $this->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m')", $filters['month']);
         }
         if (!empty($filters['category_id'])) {
-            $builder->where('transactions.category_id', $filters['category_id']);
+            $this->where('transactions.category_id', $filters['category_id']);
         }
         if (!empty($filters['search'])) {
-            $builder->groupStart()
+            $this->groupStart()
                 ->like('transactions.description', $filters['search'])
                 ->orLike('categories.name', $filters['search'])
             ->groupEnd();
         }
 
-        return $builder->orderBy('transactions.transaction_date', 'DESC')
-            ->orderBy('transactions.created_at', 'DESC')
-            ->findAll();
+        $this->orderBy('transactions.transaction_date', 'DESC')
+            ->orderBy('transactions.created_at', 'DESC');
+
+        if ($perPage) {
+            return $this->paginate($perPage);
+        }
+
+        return $this->findAll();
     }
 
     public function getMonthlySummary(int $userId, string $month): array

@@ -26,7 +26,28 @@ class Transaction extends BaseController
             'search'      => $this->request->getGet('search'),
         ];
 
-        $transactions = $this->model->getWithCategory($userId, $filters);
+        $perPage      = 20;
+        $transactions = $this->model->getWithCategory($userId, $filters, $perPage);
+        $pager        = $this->model->pager;
+
+        // Get total summary for filtered transactions (not just current page)
+        $summary = $this->model->select("
+                SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END) AS total_income,
+                SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END) AS total_expense,
+                COUNT(*) AS total_count"
+            )->join('categories', 'categories.id = transactions.category_id', 'left')
+            ->where('transactions.user_id', $userId);
+
+        if (!empty($filters['type'])) $summary->where('transactions.type', $filters['type']);
+        if (!empty($filters['month'])) $summary->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m')", $filters['month']);
+        if (!empty($filters['category_id'])) $summary->where('transactions.category_id', $filters['category_id']);
+        if (!empty($filters['search'])) {
+            $summary->groupStart()
+                ->like('transactions.description', $filters['search'])
+                ->orLike('categories.name', $filters['search'])
+            ->groupEnd();
+        }
+        $totals = $summary->get()->getRowArray();
         
         // Calculate Opening Balance if month filter is set
         $openingBalance = null;
@@ -39,10 +60,12 @@ class Transaction extends BaseController
 
         return view('transaction/index', [
             'transactions'      => $transactions,
+            'pager'             => $pager,
             'filters'           => $filters,
             'incomeCategories'  => $incomeCategories,
             'expenseCategories' => $expenseCategories,
             'openingBalance'    => $openingBalance,
+            'totals'            => $totals,
         ]);
     }
 

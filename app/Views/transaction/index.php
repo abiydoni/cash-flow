@@ -70,15 +70,15 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
     <?php if (! empty($transactions)): ?>
         <!-- Summary row -->
         <?php
-        $totalIn  = array_sum(array_map(fn($t) => $t['type']==='income' ? $t['amount'] : 0, $transactions));
-        $totalOut = array_sum(array_map(fn($t) => $t['type']==='expense' ? $t['amount'] : 0, $transactions));
+        $totalIn  = $totals['total_income'] ?? 0;
+        $totalOut = $totals['total_expense'] ?? 0;
         $opening  = $openingBalance ?? 0;
         $net      = $totalIn - $totalOut;
         $grandTotal = $opening + $net;
         ?>
         <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-3 flex-wrap">
-                <span class="text-slate-500 dark:text-slate-400"><?= lang('App.total_transactions', [count($transactions)]) ?></span>
+                <span class="text-slate-500 dark:text-slate-400"><?= lang('App.total_transactions', [$totals['total_count'] ?? 0]) ?></span>
                 <span class="text-emerald-400 font-semibold">+<?= rupiah($totalIn) ?></span>
                 <span class="text-red-400 font-semibold">-<?= rupiah($totalOut) ?></span>
             </div>
@@ -154,6 +154,12 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
             </div>
             <?php endforeach; ?>
         </div>
+
+        <?php if ($pager->getPageCount() > 1): ?>
+        <div class="px-4 py-2 border-t border-slate-200 dark:border-slate-700">
+            <?= $pager->links('default', 'App\Views\pager\tailwind') ?>
+        </div>
+        <?php endif; ?>
     <?php else: ?>
         <div class="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
             <ion-icon name="receipt-outline" class="text-5xl mb-3"></ion-icon>
