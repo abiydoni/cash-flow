@@ -49,11 +49,14 @@ class Dashboard extends BaseController
             ];
         }
 
+        $grandTotalBalance = $this->transModel->getGrandTotalBalance($userId);
+        
         return view('dashboard/index', [
             'month'          => $month,
             'summary'        => $summary,
             'balance'        => $balance,
             'openingBalance' => $openingBalance,
+            'grandTotalBalance' => $grandTotalBalance,
             'recentTx'       => $recentTx,
             'chartData'      => $chartData,
             'byCategory'     => $byCategory,
