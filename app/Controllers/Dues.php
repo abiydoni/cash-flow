@@ -51,11 +51,35 @@ class Dues extends BaseController
         $year = $this->request->getGet('year') ?? date('Y');
         $members = $this->memberModel->where('user_id', $userId)->where('is_active', 1)->findAll();
 
+        // Fetch all payments for this dues type in this year for all members of this user
+        $memberIds = array_column($members, 'id');
+        $paymentMatrix = [];
+        if (!empty($memberIds)) {
+            $allPayments = $this->paymentModel
+                ->where('dues_type_id', $typeId)
+                ->where('year', $year)
+                ->whereIn('member_id', $memberIds)
+                ->findAll();
+
+            foreach ($allPayments as $p) {
+                if (!isset($paymentMatrix[$p['member_id']])) {
+                    $paymentMatrix[$p['member_id']] = [];
+                }
+                $paymentMatrix[$p['member_id']][$p['month']] = (float)$p['amount_paid'];
+            }
+        }
+
         $data = [
             'title'   => lang('App.dues_payment') . ': ' . $type['name'],
             'type'    => $type,
             'members' => $members,
-            'year'    => $year
+            'year'    => $year,
+            'paymentMatrix' => $paymentMatrix,
+            'months' => [
+                1 => lang('App.january'), 2 => lang('App.february'), 3 => lang('App.march'), 4 => lang('App.april'), 
+                5 => lang('App.may'), 6 => lang('App.june'), 7 => lang('App.july'), 8 => lang('App.august'), 
+                9 => lang('App.september'), 10 => lang('App.october'), 11 => lang('App.november'), 12 => lang('App.december')
+            ]
         ];
         return view('dues/type', $data);
     }
