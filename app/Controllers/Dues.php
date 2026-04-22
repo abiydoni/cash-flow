@@ -244,7 +244,7 @@ class Dues extends BaseController
 
         // Delete associated transaction if exists
         if ($payment['transaction_id']) {
-            $this->transModel->delete($payment['transaction_id']);
+            $this->transModel->delete($payment['transaction_id'], true); // true = purge/hard delete
         }
 
         // Delete payment record
