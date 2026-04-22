@@ -48,7 +48,19 @@
 
     <!-- Executive Summary Stats -->
     <!-- Executive Summary Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 print:grid-cols-4 print:gap-4 no-print">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 print:grid-cols-5 print:gap-4 no-print">
+        <!-- Opening Balance Card -->
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg relative overflow-hidden group print:rounded-2xl print:border-slate-300">
+            <div class="relative">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.opening_balance') ?></p>
+                <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Rp <?= number_format($openingBalance, 0, ',', '.') ?></h3>
+                <div class="mt-2 flex items-center gap-1.5">
+                    <div class="w-6 h-6 rounded-lg bg-slate-500/10 flex items-center justify-center text-slate-500 text-[10px]"><ion-icon name="calendar-clear-outline"></ion-icon></div>
+                    <span class="text-[8px] font-bold text-slate-500 uppercase"><?= $year - 1 ?></span>
+                </div>
+            </div>
+        </div>
+
         <!-- Income Card -->
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg relative overflow-hidden group print:rounded-2xl print:border-slate-300">
             <div class="relative">
