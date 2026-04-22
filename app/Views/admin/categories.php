@@ -81,7 +81,7 @@
                                 </td>
                                  <td class="px-1 sm:px-6 py-2 sm:py-3 text-right">
                                      <div class="flex justify-end gap-1 sm:gap-1.5">
-                                         <button onclick='editCat(<?= json_encode($cat) ?>)' class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
+                                         <button onclick="editCat(<?= esc(json_encode($cat), 'attr') ?>)" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
                                              <ion-icon name="create-outline" class="text-[10px] sm:text-xs"></ion-icon>
                                          </button>
                                          <button onclick="deleteCat(<?= $cat['id'] ?>)" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
@@ -154,7 +154,10 @@ function addCat() {
             fetch(`<?= base_url('admin/categories/store') ?>`, { 
                 method: 'POST', 
                 body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
             })
                 .then(r => r.json())
                 .then(data => {
@@ -276,7 +279,10 @@ function editCat(cat) {
             fetch(`<?= base_url('admin/categories/update/') ?>${cat.id}`, { 
                 method: 'POST', 
                 body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
             })
                 .then(r => r.json())
                 .then(data => {

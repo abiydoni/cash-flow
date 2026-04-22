@@ -98,6 +98,9 @@ class Transaction extends BaseController
         ];
 
         if (! $this->validate($rules)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
+            }
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -116,8 +119,20 @@ class Transaction extends BaseController
         ];
 
         if ($this->model->insert($data)) {
+            if ($this->request->isAJAX()) {
+                $savedTx = $this->model->getWithCategory($userId, ['id' => $this->model->getInsertID()]);
+                return $this->response->setJSON([
+                    'status' => 'success', 
+                    'message' => lang('App.save_success'),
+                    'transaction' => $savedTx[0] ?? null
+                ]);
+            }
             return redirect()->to('/transaction')
                 ->with('success', lang('App.save_success'));
+        }
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => lang('App.error')]);
         }
 
         return redirect()->back()->withInput()->with('error', lang('App.error'));
@@ -163,6 +178,9 @@ class Transaction extends BaseController
         ];
 
         if (! $this->validate($rules)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
+            }
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -178,6 +196,14 @@ class Transaction extends BaseController
         ];
 
         $this->model->update($id, $data);
+        if ($this->request->isAJAX()) {
+            $updatedTx = $this->model->getWithCategory($userId, ['id' => $id]);
+            return $this->response->setJSON([
+                'status' => 'success', 
+                'message' => lang('App.update_success'),
+                'transaction' => $updatedTx[0] ?? null
+            ]);
+        }
         return redirect()->to('/transaction')->with('success', lang('App.update_success'));
     }
 

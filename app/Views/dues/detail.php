@@ -89,6 +89,7 @@
                         }
                     ?>
                     <tr class="<?= $isDisabled ? 'opacity-40 grayscale' : 'hover:bg-emerald-50/30 dark:hover:bg-emerald-500/10 cursor-pointer' ?> transition-colors"
+                        id="row-month-<?= $mIdx ?>"
                         <?= $isDisabled ? '' : "onclick=\"openMonthDetailModal($mIdx, '$mName')\"" ?>>
                         <td class="px-1 py-3 text-center font-bold text-slate-400 text-[9px] border-r border-slate-100 dark:border-slate-700/30"><?= $mIdx ?></td>
                         <td class="px-3 py-3 font-semibold text-slate-800 dark:text-slate-200 uppercase text-[10px]">
@@ -104,7 +105,7 @@
                                 if($pg) $screenPaidTotal += $pg['total_paid'];
                             ?>
                             <!-- Status & Nominal Combined -->
-                            <td class="px-3 py-3 text-center text-[10px]">
+                            <td class="px-3 py-3 text-center text-[10px]" id="cell-status-<?= $mIdx ?>-<?= $dt['id'] ?>">
                                 <?php if($pg): ?>
                                     <div class="<?= $isLunas ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500' ?> rounded-lg px-2 py-1.5 text-[10px] font-bold inline-block leading-tight border <?= $isLunas ? 'border-emerald-500/20' : 'border-orange-500/20' ?>">
                                         <span class="text-[8px] mr-px opacity-30 font-normal">Rp</span><?= number_format($pg['total_paid'], 0, ',', '.') ?>
@@ -115,7 +116,7 @@
                             </td>
 
                             <!-- Unified Actions Column -->
-                            <td class="px-1.5 py-3 text-center border-l border-slate-100 dark:border-slate-700/30">
+                            <td class="px-1.5 py-3 text-center border-l border-slate-100 dark:border-slate-700/30" id="cell-actions-<?= $mIdx ?>-<?= $dt['id'] ?>">
                                 <div class="flex items-center justify-center gap-0.5">
                                     <?php if (!$isLunas): ?>
                                         <?php if ($isDisabled && !$pg): ?>
@@ -129,20 +130,15 @@
                                     <?php endif; ?>
 
                                     <?php if($pg): ?>
-                                        <?php if ($paymentCount > 1): ?>
-                                            <button onclick="event.stopPropagation(); openMonthDetailModal(<?= $mIdx ?>, '<?= $mName ?>')" class="w-7 h-7 flex items-center justify-center text-orange-400 hover:text-orange-500 transition-all active:scale-95" title="<?= lang('App.multiple_payments_hint') ?>">
-                                                <ion-icon name="list-outline" class="text-lg"></ion-icon>
-                                            </button>
-                                        <?php else: ?>
-                                            <button onclick="event.stopPropagation(); deletePayment(<?= $pg['records'][0]['id'] ?>)" class="w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-500 transition-all active:scale-95" title="<?= lang('App.confirm_delete_payment_title') ?>">
-                                                <ion-icon name="trash-outline" class="text-lg"></ion-icon>
-                                            </button>
-                                        <?php endif; ?>
+                                        <button onclick="event.stopPropagation(); openMonthDetailModal(<?= $mIdx ?>, '<?= $mName ?>')" class="w-7 h-7 flex items-center justify-center text-orange-400 hover:text-orange-500 transition-all active:scale-95" title="<?= lang('App.multiple_payments_hint') ?>">
+                                            <ion-icon name="list-outline" class="text-lg"></ion-icon>
+                                        </button>
                                     <?php endif; ?>
                                 </div>
                             </td>
                         <?php endforeach; ?>
                     </tr>
+
                 <?php endforeach; ?>
             </tbody>
             <tfoot class="bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700">
@@ -334,7 +330,25 @@
     </div>
 </div>
 
+<?= $this->section('scripts') ?>
+<script>
+const duesTypes = <?= json_encode($duesTypes) ?>;
+const paymentGrid = <?= json_encode($paymentGrid) ?>;
+const months = <?= json_encode($months) ?>;
+const locale = 'id-ID';
+const txtTariff = '<?= lang('App.standard_tariff') ?>';
+const duesTypeMap = <?php 
+    $map = [];
+    foreach($duesTypes as $dt) {
+        $slug = preg_replace('/[^a-z0-9]/', '_', strtolower(trim($dt['name'])));
+        $trans = lang('App.' . $slug);
+        $map[$dt['name']] = ($trans === 'App.' . $slug) ? $dt['name'] : $trans;
+    }
+    echo json_encode($map);
+?>;
+
 function openMonthDetailModal(monthIdx, monthName) {
+
     let contentHtml = `<div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">`;
     
     duesTypes.forEach(dt => {
@@ -437,8 +451,11 @@ function openPayModal(month, monthName, duesTypeId, duesTypeName, defaultAmount)
                 hideLoading();
                 if (data.status === 'success') {
                     Modal.hide();
-                    location.reload();
+                    Toast.fire({ icon: 'success', title: data.message, timer: 2000 });
+                    // Dynamic Update instead of reload
+                    updateMatrixCell(month, duesTypeId, data.payment);
                 } else {
+
                     Toast.fire({ icon: 'error', title: data.message });
                 }
             })
@@ -465,10 +482,13 @@ function deletePayment(id) {
                 .then(r => r.json())
                 .then(data => {
                     hideLoading();
-                    if (data.status === 'success') {
-                        Modal.hide();
-                        location.reload();
-                    } else {
+                if (data.status === 'success') {
+                    Modal.hide();
+                    Toast.fire({ icon: 'success', title: data.message, timer: 2000 });
+                    // Dynamic Update instead of reload
+                    updateMatrixCell(data.month, data.dues_type_id, data.summary);
+                } else {
+
                         Toast.fire({ icon: 'error', title: data.message });
                     }
                 })
@@ -476,7 +496,54 @@ function deletePayment(id) {
         }
     });
 }
+function updateMatrixCell(month, typeId, summary) {
+    const statusCell = document.getElementById(`cell-status-${month}-${typeId}`);
+    const actionsCell = document.getElementById(`cell-actions-${month}-${typeId}`);
+    if (!statusCell || !actionsCell) return;
+
+    const dt = duesTypes.find(t => t.id == typeId);
+    if (!dt) return;
+
+    const tariff = dt.amount;
+    const isLunas = summary && summary.total_paid >= tariff;
+    const mName = months[month];
+
+    // Update Status Cell
+    if (summary && summary.total_paid > 0) {
+        statusCell.innerHTML = `
+            <div class="${isLunas ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'} rounded-lg px-2 py-1.5 text-[10px] font-bold inline-block leading-tight border ${isLunas ? 'border-emerald-500/20' : 'border-orange-500/20'}">
+                <span class="text-[8px] mr-px opacity-30 font-normal">Rp</span>${parseInt(summary.total_paid).toLocaleString(locale)}
+            </div>
+        `;
+    } else {
+        statusCell.innerHTML = `<span class="text-[9px] text-slate-400 dark:text-slate-500">-</span>`;
+    }
+
+    // Update Actions Cell
+    let actionsHTML = `<div class="flex items-center justify-center gap-0.5">`;
+    if (!isLunas) {
+        actionsHTML += `
+            <button onclick="event.stopPropagation(); openPayModal(${month}, '${mName}', ${typeId}, '${dt.name}', ${tariff - (summary ? summary.total_paid : 0)})" 
+                class="w-7 h-7 flex items-center justify-center text-emerald-500 hover:text-emerald-600 transition-all active:scale-95" title="${summary ? 'Pay Sisa' : 'Pay'}">
+                <ion-icon name="card-outline" class="text-lg"></ion-icon>
+            </button>
+        `;
+    }
+    if (summary && summary.total_paid > 0) {
+        actionsHTML += `
+            <button onclick="event.stopPropagation(); openMonthDetailModal(${month}, '${mName}')" class="w-7 h-7 flex items-center justify-center text-orange-400 hover:text-orange-500 transition-all active:scale-95" title="Detail">
+                <ion-icon name="list-outline" class="text-lg"></ion-icon>
+            </button>
+        `;
+    }
+    actionsHTML += `</div>`;
+    actionsCell.innerHTML = actionsHTML;
+
+    // Optional: Update Footer Total (needs a bit more work to scrape and sum all rows, or re-fetch summary)
+    // For now, we just update the cell to keep it fast.
+}
 </script>
+
 
 <style>
 @media print {

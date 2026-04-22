@@ -207,7 +207,20 @@ class Dues extends BaseController
         ]);
 
         if ($this->request->isAJAX()) {
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Pembayaran berhasil disimpan']);
+            $summary = $this->paymentModel->selectSum('amount_paid', 'total_paid')
+                ->where('member_id', $memberId)
+                ->where('dues_type_id', $duesTypeId)
+                ->where('month', $month)
+                ->where('year', $year)
+                ->get()->getRowArray();
+
+            return $this->response->setJSON([
+                'status' => 'success', 
+                'message' => lang('App.save_success'),
+                'payment' => [
+                    'total_paid' => $summary['total_paid'] ?? 0
+                ]
+            ]);
         }
 
         return redirect()->back()->with('success', 'Pembayaran berhasil disimpan');
@@ -220,6 +233,12 @@ class Dues extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan']);
         }
 
+        // Before delete, get info for dynamic update
+        $month = $payment['month'];
+        $memberId = $payment['member_id'];
+        $duesTypeId = $payment['dues_type_id'];
+        $year = $payment['year'];
+
         // Delete associated transaction if exists
         if ($payment['transaction_id']) {
             $this->transModel->delete($payment['transaction_id']);
@@ -228,6 +247,21 @@ class Dues extends BaseController
         // Delete payment record
         $this->paymentModel->delete($id);
 
-        return $this->response->setJSON(['status' => 'success', 'message' => 'Pembayaran berhasil dihapus']);
+        $summary = $this->paymentModel->selectSum('amount_paid', 'total_paid')
+            ->where('member_id', $memberId)
+            ->where('dues_type_id', $duesTypeId)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->get()->getRowArray();
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => lang('App.delete_success'),
+            'month' => $month,
+            'dues_type_id' => $duesTypeId,
+            'summary' => [
+                'total_paid' => $summary['total_paid'] ?? 0
+            ]
+        ]);
     }
 }

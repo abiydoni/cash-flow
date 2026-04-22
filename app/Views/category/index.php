@@ -58,7 +58,7 @@
                         <td class="px-3 sm:px-6 py-4 text-right">
                             <?php if($cat['user_id'] == session('user_id')): ?>
                             <div class="flex items-center justify-end gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick='editCat(<?= json_encode($cat) ?>)' class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.edit') ?>">
+                                <button onclick="editCat(<?= esc(json_encode($cat), 'attr') ?>)" class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.edit') ?>">
                                     <ion-icon name="create-outline"></ion-icon>
                                 </button>
                                 <button onclick="deleteCat(<?= $cat['id'] ?>)" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.delete') ?>">
@@ -179,7 +179,10 @@ function submitCat(data) {
     fetch(url, { 
         method: 'POST', 
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
     })
         .then(r => r.json())
         .then(res => {

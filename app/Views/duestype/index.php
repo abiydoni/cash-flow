@@ -44,7 +44,7 @@
                                 </td>
                                 <td class="px-3 py-3 text-right">
                                     <div class="flex justify-end gap-1">
-                                        <button onclick='editDuesType(<?= json_encode($dt) ?>)' class="w-7 h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
+                                        <button onclick="editDuesType(<?= esc(json_encode($dt), 'attr') ?>)" class="w-7 h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
                                              <ion-icon name="create-outline"></ion-icon>
                                          </button>
                                          <button onclick="deleteDuesType(<?= $dt['id'] ?>)" class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
@@ -134,7 +134,10 @@ function submitDuesType(data) {
     fetch(`<?= base_url('duestype/store') ?>`, { 
         method: 'POST', 
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
     })
         .then(r => r.json())
         .then(res => {
