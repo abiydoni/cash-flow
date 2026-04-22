@@ -285,20 +285,32 @@ function submitUser(data) {
         body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
-        .then(r => r.json())
+        .then(async r => {
+            const isJson = r.headers.get('content-type')?.includes('application/json');
+            const res = isJson ? await r.json() : null;
+            
+            if (!r.ok) throw new Error(res?.message || 'Server error: ' + r.status);
+            return res;
+        })
         .then(res => {
             hideLoading();
-            if (res.status === 'success') {
+            if (res && res.status === 'success') {
                 Modal.hide();
-                Toast.fire({ icon: 'success', title: res.message }).then(() => location.reload());
+                Toast.fire({ 
+                    icon: 'success', 
+                    title: res.message,
+                    timer: 1500 
+                }).then(() => {
+                    location.reload();
+                });
             } else {
-                Toast.fire({ icon: 'error', title: res.message });
+                Toast.fire({ icon: 'error', title: res?.message || 'Unknown error occurred' });
             }
         })
         .catch(err => { 
             hideLoading(); 
-            Toast.fire({ icon: 'error', title: 'Network error or server failure' }); 
-            console.error(err);
+            console.error('Submission Error:', err);
+            Toast.fire({ icon: 'error', title: err.message || 'Network error or server failure' }); 
         });
 }
 

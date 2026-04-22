@@ -21,15 +21,8 @@ class UserModel extends Model
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    protected $validationRules = [
-        'username' => 'required|min_length[3]|max_length[50]|is_unique[users.username,id,{id}]',
-        'email'    => 'required|valid_email|is_unique[users.email,id,{id}]',
-    ];
-
-    protected $validationMessages = [
-        'username' => ['is_unique' => 'Username sudah digunakan.'],
-        'email'    => ['is_unique' => 'Email sudah terdaftar.'],
-    ];
+    protected $validationRules = [];
+    protected $validationMessages = [];
 
     protected $beforeInsert = ['hashPassword'];
     protected $beforeUpdate = ['hashPassword'];

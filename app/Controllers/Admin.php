@@ -43,19 +43,18 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        $userData = [
+        $userId = $this->userModel->insert([
             'username'  => $this->request->getPost('username'),
             'email'     => $this->request->getPost('email'),
             'password'  => $this->request->getPost('password'),
             'role'      => $this->request->getPost('role'),
             'is_active' => 1,
-        ];
+        ]);
 
-        if (!$this->userModel->insert($userData)) {
+        if (!$userId) {
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->userModel->errors())]);
         }
 
-        $userId = $this->userModel->getInsertID();
         $this->profileModel->insert([
             'user_id'   => $userId,
             'full_name' => $this->request->getPost('full_name'),
@@ -117,6 +116,7 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->userModel->errors())]);
         }
 
+        // Use upsert to handle cases where profile might be missing
         $this->profileModel->where('user_id', $id)->set([
             'full_name' => $this->request->getPost('full_name')
         ])->update();
