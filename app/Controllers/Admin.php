@@ -53,6 +53,55 @@ class Admin extends BaseController
         return $this->response->setJSON(['status' => 'success', 'message' => lang('App.delete_success')]);
     }
 
+    public function updateUser(int $id)
+    {
+        $user = $this->userModel->find($id);
+        if (!$user) return $this->response->setJSON(['status' => 'error', 'message' => lang('App.not_found')]);
+
+        $rules = [
+            'username'  => "required|min_length[3]|max_length[50]|is_unique[users.username,id,{$id}]",
+            'email'     => "required|valid_email|is_unique[users.email,id,{$id}]",
+            'full_name' => "required|min_length[3]",
+            'role'      => "required|in_list[admin,user]",
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
+        }
+
+        $this->userModel->update($id, [
+            'username' => $this->request->getPost('username'),
+            'email'    => $this->request->getPost('email'),
+            'role'     => $this->request->getPost('role'),
+        ]);
+
+        $this->profileModel->where('user_id', $id)->set([
+            'full_name' => $this->request->getPost('full_name')
+        ])->update();
+
+        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+    }
+
+    public function changePassword(int $id)
+    {
+        $user = $this->userModel->find($id);
+        if (!$user) return $this->response->setJSON(['status' => 'error', 'message' => lang('App.not_found')]);
+
+        $rules = [
+            'password' => 'required|min_length[6]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
+        }
+
+        $this->userModel->update($id, [
+            'password' => $this->request->getPost('password')
+        ]);
+
+        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.password_updated')]);
+    }
+
     // ─── ALL TRANSACTIONS ─────────────────────────────────────────────────────
     public function transactions()
     {

@@ -58,6 +58,16 @@
                     </td>
                     <td class="px-5 py-3 text-right">
                         <div class="flex items-center justify-end gap-1.5">
+                            <button onclick='editUser(<?= json_encode($u) ?>)'
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 transition-colors"
+                                title="<?= lang('App.edit') ?>">
+                                <ion-icon name="create-outline"></ion-icon>
+                            </button>
+                            <button onclick="changePassword(<?= $u['id'] ?>)"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 transition-colors"
+                                title="<?= lang('App.change_password') ?>">
+                                <ion-icon name="key-outline"></ion-icon>
+                            </button>
                             <?php if ($u['id'] != session('user_id')): ?>
                             <button onclick="deleteUser(<?= $u['id'] ?>)"
                                 class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-colors"
@@ -102,12 +112,20 @@
                         <?php endif; ?>
                     </div>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <?php if ($u['id'] != session('user_id')): ?>
-                    <button onclick="deleteUser(<?= $u['id'] ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 text-red-400">
-                        <ion-icon name="trash-outline"></ion-icon>
-                    </button>
-                    <?php endif; ?>
+                <div class="flex flex-col items-end gap-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <button onclick='editUser(<?= json_encode($u) ?>)' class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400">
+                            <ion-icon name="create-outline"></ion-icon>
+                        </button>
+                        <button onclick="changePassword(<?= $u['id'] ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                            <ion-icon name="key-outline"></ion-icon>
+                        </button>
+                        <?php if ($u['id'] != session('user_id')): ?>
+                        <button onclick="deleteUser(<?= $u['id'] ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 text-red-400">
+                            <ion-icon name="trash-outline"></ion-icon>
+                        </button>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,6 +183,109 @@ function toggleUser(id, el) {
                 hideLoading();
                 Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' });
             });
+    });
+}
+
+function editUser(user) {
+    Swal.fire({
+        title: '<?= lang('App.edit_user') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Full Name</label>
+                    <input id="swal-full-name" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" value="${user.full_name || ''}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Username</label>
+                    <input id="swal-username" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" value="${user.username}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</label>
+                    <input id="swal-email" type="email" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" value="${user.email}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Role</label>
+                    <select id="swal-role" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all">
+                        <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '<?= lang('App.save_changes') ?>',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#475569',
+        background: '#1e293b', color: '#f1f5f9',
+        preConfirm: () => {
+            return {
+                full_name: document.getElementById('swal-full-name').value,
+                username: document.getElementById('swal-username').value,
+                email: document.getElementById('swal-email').value,
+                role: document.getElementById('swal-role').value
+            }
+        }
+    }).then(result => {
+        if (result.isConfirmed) {
+            showLoading();
+            const formData = new FormData();
+            formData.append('full_name', result.value.full_name);
+            formData.append('username', result.value.username);
+            formData.append('email', result.value.email);
+            formData.append('role', result.value.role);
+
+            fetch(`<?= base_url('admin/users/update/') ?>${user.id}`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Toast.fire({ icon: 'success', title: data.message }).then(() => location.reload());
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', html: data.message, background: '#1e293b', color: '#f1f5f9' });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' }); });
+        }
+    });
+}
+
+function changePassword(id) {
+    Swal.fire({
+        title: '<?= lang('App.change_password') ?>',
+        html: `
+            <div class="text-left">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">New Password</label>
+                <input id="swal-password" type="password" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" placeholder="Min 6 chars">
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '<?= lang('App.update_password') ?>',
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#475569',
+        background: '#1e293b', color: '#f1f5f9',
+        preConfirm: () => { return document.getElementById('swal-password').value; }
+    }).then(result => {
+        if (result.isConfirmed) {
+            if (!result.value || result.value.length < 6) {
+                Toast.fire({ icon: 'error', title: 'Password min 6 chars!' });
+                return;
+            }
+            showLoading();
+            const formData = new FormData();
+            formData.append('password', result.value);
+
+            fetch(`<?= base_url('admin/users/password/') ?>${id}`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Toast.fire({ icon: 'success', title: data.message });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', html: data.message, background: '#1e293b', color: '#f1f5f9' });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' }); });
+        }
     });
 }
 

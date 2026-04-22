@@ -75,6 +75,8 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('users',                   'Admin::users');
     $routes->post('users/toggle/(:num)',     'Admin::toggleUser/$1');
     $routes->post('users/delete/(:num)',     'Admin::deleteUser/$1');
+    $routes->post('users/update/(:num)',     'Admin::updateUser/$1');
+    $routes->post('users/password/(:num)',   'Admin::changePassword/$1');
 
     $routes->get('transactions',            'Admin::transactions');
 
