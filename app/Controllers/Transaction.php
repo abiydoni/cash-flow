@@ -9,11 +9,13 @@ class Transaction extends BaseController
 {
     protected TransactionModel $model;
     protected CategoryModel    $catModel;
+    protected \App\Models\DuesPaymentModel $paymentModel;
 
     public function __construct()
     {
-        $this->model    = new TransactionModel();
-        $this->catModel = new CategoryModel();
+        $this->model        = new TransactionModel();
+        $this->catModel     = new CategoryModel();
+        $this->paymentModel = new \App\Models\DuesPaymentModel();
     }
 
     public function index()
@@ -199,6 +201,13 @@ class Transaction extends BaseController
         ];
 
         $this->model->update($id, $data);
+
+        // Sync with Dues Payment if linked
+        $this->paymentModel->where('transaction_id', $id)->set([
+            'amount_paid' => $data['amount'],
+            'payment_date' => $data['transaction_date']
+        ])->update();
+
         if ($this->request->isAJAX()) {
             $updatedTx = $this->model->getWithCategory($userId, ['id' => $id]);
             return $this->response->setJSON([
@@ -221,6 +230,10 @@ class Transaction extends BaseController
         }
 
         $this->model->delete($id);
+        
+        // Also delete linked Dues Payment
+        $this->paymentModel->where('transaction_id', $id)->delete();
+
         return $this->response->setJSON(['status' => 'success', 'message' => lang('App.delete_success')]);
     }
 
