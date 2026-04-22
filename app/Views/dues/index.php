@@ -6,19 +6,7 @@
         <ion-icon name="calendar-outline" class="text-emerald-400"></ion-icon>
         <?= lang('App.dues_payment') ?>
     </h2>
-    <div class="flex items-center gap-3">
-        <form method="GET" class="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-emerald-500/30">
-            <select name="year" onchange="this.form.submit()" class="bg-transparent border-none text-xs font-bold text-slate-600 dark:text-slate-300 focus:ring-0 cursor-pointer pl-4 pr-10">
-                <?php for($y = date('Y')-2; $y <= date('Y')+1; $y++): ?>
-                    <option value="<?= $y ?>" <?= $y == $year ? 'selected' : '' ?>><?= $y ?></option>
-                <?php endfor; ?>
-            </select>
-        </form>
 
-        <button onclick="window.print()" class="h-10 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white font-bold text-xs transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-            <ion-icon name="print-outline" class="text-lg"></ion-icon> <?= lang('App.print') ?>
-        </button>
-    </div>
 </div>
 
 <!-- Restructured Dues Selection -->

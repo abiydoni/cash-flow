@@ -89,7 +89,7 @@
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-lg relative overflow-hidden group print:rounded-2xl print:border-slate-900 print:bg-slate-50">
             <div class="relative">
                 <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1"><?= lang('App.net_balance') ?></p>
-                <h3 class="text-sm font-bold text-white print:text-slate-900 whitespace-nowrap">Rp <?= number_format($totalIncome - $totalExpense, 0, ',', '.') ?></h3>
+                <h3 class="text-sm font-bold text-white print:text-slate-900 whitespace-nowrap">Rp <?= number_format($totalIncome - $totalExpense + $openingBalance, 0, ',', '.') ?></h3>
                 <div class="mt-2 flex items-center gap-1.5">
                     <div class="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-900 text-[10px]"><ion-icon name="wallet-outline"></ion-icon></div>
                     <span class="text-[8px] font-bold text-slate-400 uppercase print:text-slate-600"><?= lang('App.current_cash') ?></span>
@@ -119,6 +119,23 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    <!-- Row for Opening Balance (Previous Year) -->
+                    <tr class="bg-slate-50/50 dark:bg-slate-900/50 italic">
+                        <td class="px-1 py-2 text-[8px] font-bold text-slate-400 text-center border-r border-slate-50 dark:border-slate-700">-</td>
+                        <td class="px-1 py-2 text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter border-r border-slate-50 dark:border-slate-700">
+                            Saldo Awal <?= $year ?>
+                        </td>
+                        <td class="px-1 py-2 text-[9px] font-bold text-slate-400 text-right border-r border-slate-50 dark:border-slate-700 whitespace-nowrap tracking-tighter">
+                            <?= number_format($openingBalance, 0, ',', '.') ?>
+                        </td>
+                        <td class="px-1 py-2 text-[9px] font-bold text-slate-400 text-right border-r border-slate-50 dark:border-slate-700 whitespace-nowrap tracking-tighter">
+                            0
+                        </td>
+                        <td class="px-1 py-2 text-[9px] font-bold text-right text-slate-400 whitespace-nowrap tracking-tighter">
+                            <?= number_format($openingBalance, 0, ',', '.') ?>
+                        </td>
+                        <td class="px-1 py-2 text-right no-print"></td>
+                    </tr>
                     <?php 
                     $months = [
                         1=>lang('App.january'), 2=>lang('App.february'), 3=>lang('App.march'), 4=>lang('App.april'),
@@ -158,9 +175,9 @@
                     <tr>
                         <td class="px-1"></td>
                         <td class="px-2 py-3 text-[10px] uppercase font-black uppercase tracking-widest border-r border-slate-300"><?= lang('App.total_annual_flow') ?></td>
-                        <td class="px-2 py-3 text-[10px] text-right border-r border-slate-300 whitespace-nowrap">Rp <?= number_format($totalIncome, 0, ',', '.') ?></td>
+                        <td class="px-2 py-3 text-[10px] text-right border-r border-slate-300 whitespace-nowrap">Rp <?= number_format($totalIncome + $openingBalance, 0, ',', '.') ?></td>
                         <td class="px-2 py-3 text-[10px] text-right border-r border-slate-300 whitespace-nowrap">Rp <?= number_format($totalExpense, 0, ',', '.') ?></td>
-                        <td class="px-2 py-3 text-[10px] text-right whitespace-nowrap">Rp <?= number_format($totalIncome - $totalExpense, 0, ',', '.') ?></td>
+                        <td class="px-2 py-3 text-[10px] text-right whitespace-nowrap">Rp <?= number_format($totalIncome - $totalExpense + $openingBalance, 0, ',', '.') ?></td>
                         <td class="px-2 py-3 no-print"></td>
                     </tr>
                 </tfoot>
@@ -169,16 +186,16 @@
         <!-- Annual Summary (outside table - screen only) -->
         <div class="no-print bg-slate-900 px-4 py-4 sm:px-8 sm:py-6 flex flex-col gap-3">
             <div class="flex justify-between items-center pb-2 border-b border-white/5">
-                <span class="text-[9px] uppercase tracking-widest text-slate-400"><?= lang('App.total_annual_income') ?></span>
-                <span class="text-sm font-bold text-emerald-400 whitespace-nowrap">Rp <?= number_format($totalIncome, 0, ',', '.') ?></span>
+                <span class="text-[9px] uppercase tracking-widest text-slate-400"><?= lang('App.total_annual_income') ?> (+Saldo Awal)</span>
+                <span class="text-sm font-bold text-emerald-400 whitespace-nowrap">Rp <?= number_format($totalIncome + $openingBalance, 0, ',', '.') ?></span>
             </div>
             <div class="flex justify-between items-center pb-2 border-b border-white/5">
                 <span class="text-[9px] uppercase tracking-widest text-slate-400"><?= lang('App.total_annual_expense') ?></span>
                 <span class="text-sm font-bold text-red-400 whitespace-nowrap">Rp <?= number_format($totalExpense, 0, ',', '.') ?></span>
             </div>
             <div class="flex justify-between items-center pt-1">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-white"><?= lang('App.total_annual_balance') ?></span>
-                <span class="text-lg font-bold text-white whitespace-nowrap">Rp <?= number_format($totalIncome - $totalExpense, 0, ',', '.') ?></span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-white">Total Saldo Akhir <?= $year ?></span>
+                <span class="text-lg font-bold text-white whitespace-nowrap">Rp <?= number_format($totalIncome - $totalExpense + $openingBalance, 0, ',', '.') ?></span>
             </div>
         </div>
     </div>

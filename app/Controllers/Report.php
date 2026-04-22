@@ -41,14 +41,18 @@ class Report extends BaseController
         // Monthly Trends
         $trends = $this->getMonthlyTrends($year, $userId);
 
+        // Opening Balance (Balance before this year)
+        $openingBalance = $this->transModel->getOpeningBalance($userId, $year . '-01');
+
         $data = [
-            'title'         => lang('App.reports'),
-            'year'          => $year,
-            'totalIncome'   => $totalIncome,
-            'totalExpense'  => $totalExpense,
-            'duesCollected' => $duesCollected['amount_paid'] ?? 0,
-            'activeMembers' => $activeMembers,
-            'trends'        => $trends
+            'title'          => lang('App.reports'),
+            'year'           => $year,
+            'totalIncome'    => $totalIncome,
+            'totalExpense'   => $totalExpense,
+            'duesCollected'  => $duesCollected['amount_paid'] ?? 0,
+            'activeMembers'  => $activeMembers,
+            'trends'         => $trends,
+            'openingBalance' => $openingBalance
         ];
 
         return view('report/index', $data);
@@ -86,13 +90,18 @@ class Report extends BaseController
             9=>lang('App.september'), 10=>lang('App.october'), 11=>lang('App.november'), 12=>lang('App.december')
         ][$month];
 
+        // Opening Balance (Balance before this month)
+        $monthStr = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
+        $openingBalance = $this->transModel->getOpeningBalance($userId, $monthStr);
+
         $data = [
-            'title'        => lang('App.reports') . ' ' . $monthName . ' ' . $year,
-            'year'         => $year,
-            'month'        => $month,
-            'monthName'    => $monthName,
-            'transactions' => $transactions,
-            'dues'         => $dues
+            'title'          => lang('App.reports') . ' ' . $monthName . ' ' . $year,
+            'year'           => $year,
+            'month'          => $month,
+            'monthName'      => $monthName,
+            'transactions'   => $transactions,
+            'dues'           => $dues,
+            'openingBalance' => $openingBalance
         ];
 
         return view('report/month', $data);

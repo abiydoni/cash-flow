@@ -54,8 +54,8 @@
             <p class="text-sm font-bold text-slate-900 whitespace-nowrap">Rp <?= number_format($out, 0, ',', '.') ?></p>
         </div>
         <div class="col-span-2 sm:col-span-1 p-4 border border-slate-900 rounded-2xl bg-slate-900 text-white print:border-slate-900 print:bg-slate-50 print:text-slate-900 text-center shadow-lg">
-            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.net_cashflow') ?></p>
-            <p class="text-sm font-bold whitespace-nowrap">Rp <?= number_format($in - $out, 0, ',', '.') ?></p>
+            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.net_cashflow') ?> (+Saldo Awal)</p>
+            <p class="text-sm font-bold whitespace-nowrap">Rp <?= number_format($in - $out + $openingBalance, 0, ',', '.') ?></p>
         </div>
     </div>
 
@@ -118,6 +118,14 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-[9px]">
+                        <!-- Row for Opening Balance (Previous Month) -->
+                        <tr class="bg-slate-50/50 dark:bg-slate-900/50 italic">
+                            <td class="px-2 py-2 text-slate-400 font-bold whitespace-nowrap">-</td>
+                            <td class="px-2 py-2 text-slate-500 font-bold" colspan="2">Saldo Awal Bulan</td>
+                            <td class="px-2 py-2 text-right font-bold text-slate-400 whitespace-nowrap">
+                                <?= number_format($openingBalance, 0, ',', '.') ?>
+                            </td>
+                        </tr>
                         <?php foreach($transactions as $t): ?>
                             <tr>
                                 <td class="px-2 py-2 text-slate-500 font-bold whitespace-nowrap"><?= date('d/m/y', strtotime($t['transaction_date'])) ?></td>
@@ -137,16 +145,16 @@
                     <!-- Restore TFOOT only for PRINT -->
                     <tfoot class="hidden print:table-footer-group bg-slate-100 text-slate-900 font-bold border-t-2 border-slate-900">
                         <tr>
-                            <td colspan="3" class="px-3 py-3 text-[10px] uppercase tracking-widest border-r border-slate-300"><?= lang('App.total_monthly_flow') ?></td>
-                            <td class="px-2 py-3 text-[10px] text-right whitespace-nowrap">Rp <?= number_format($in - $out, 0, ',', '.') ?></td>
+                            <td colspan="3" class="px-3 py-3 text-[10px] uppercase tracking-widest border-r border-slate-300">Total Saldo Akhir Bulan</td>
+                            <td class="px-2 py-3 text-[10px] text-right whitespace-nowrap">Rp <?= number_format($in - $out + $openingBalance, 0, ',', '.') ?></td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
             <!-- Monthly Summary (outside table - screen only) -->
             <div class="no-print bg-slate-900 px-4 py-4 sm:px-8 sm:py-5 flex justify-between items-center text-white">
-                <span class="text-[9px] uppercase tracking-widest text-slate-400"><?= lang('App.total_monthly_flow') ?></span>
-                <span class="text-sm font-bold whitespace-nowrap">Rp <?= number_format($in - $out, 0, ',', '.') ?></span>
+                <span class="text-[9px] uppercase tracking-widest text-slate-400">Total Saldo Akhir Bulan</span>
+                <span class="text-sm font-bold whitespace-nowrap">Rp <?= number_format($in - $out + $openingBalance, 0, ',', '.') ?></span>
             </div>
         </div>
         </div>
