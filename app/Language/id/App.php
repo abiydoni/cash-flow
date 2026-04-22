@@ -107,6 +107,7 @@ return [
 
     // Admin
     'registered_users' => 'pengguna terdaftar',
+    'user' => 'User',
     'role' => 'Role',
     'active' => 'Aktif',
     'inactive' => 'Nonaktif',

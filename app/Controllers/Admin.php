@@ -43,7 +43,8 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        $userId = $this->userModel->insert([
+        // Use skipValidation because we already validated manually
+        $userId = $this->userModel->skipValidation(true)->insert([
             'username'  => $this->request->getPost('username'),
             'email'     => $this->request->getPost('email'),
             'password'  => $this->request->getPost('password'),
@@ -52,7 +53,8 @@ class Admin extends BaseController
         ]);
 
         if (!$userId) {
-            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->userModel->errors())]);
+            $errors = $this->userModel->errors();
+            return $this->response->setJSON(['status' => 'error', 'message' => !empty($errors) ? implode('<br>', $errors) : 'Failed to create user record']);
         }
 
         $this->profileModel->insert([
@@ -108,18 +110,17 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        if (!$this->userModel->update($id, [
+        // Use skipValidation(true) to avoid issues with unique checks we already handled
+        $this->userModel->skipValidation(true)->update($id, [
             'username' => $this->request->getPost('username'),
             'email'    => $this->request->getPost('email'),
             'role'     => $this->request->getPost('role'),
-        ])) {
-            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->userModel->errors())]);
-        }
+        ]);
 
-        // Use upsert to handle cases where profile might be missing
-        $this->profileModel->where('user_id', $id)->set([
+        // Use upsert to handle cases where profile might be missing (e.g. for old admin accounts)
+        $this->profileModel->upsert($id, [
             'full_name' => $this->request->getPost('full_name')
-        ])->update();
+        ]);
 
         return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
     }

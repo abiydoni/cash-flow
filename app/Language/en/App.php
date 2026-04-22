@@ -107,6 +107,7 @@ return [
 
     // Admin
     'registered_users' => 'registered users',
+    'user' => 'User',
     'role' => 'Role',
     'active' => 'Active',
     'inactive' => 'Inactive',
