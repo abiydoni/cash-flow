@@ -46,6 +46,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('category',              'Category::index');
     $routes->post('category/store',       'Category::store');
     $routes->post('category/delete/(:num)','Category::delete/$1');
+    $routes->post('category/update/(:num)','Category::update/$1');
 
     // Dues (Authenticated users)
     $routes->get('dues',                'Dues::index');
@@ -73,6 +74,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 // ─── ADMIN ROUTES ─────────────────────────────────────────────────────────────
 $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('users',                   'Admin::users');
+    $routes->post('users/store',            'Admin::storeUser');
     $routes->post('users/toggle/(:num)',     'Admin::toggleUser/$1');
     $routes->post('users/delete/(:num)',     'Admin::deleteUser/$1');
     $routes->post('users/update/(:num)',     'Admin::updateUser/$1');
@@ -82,6 +84,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     $routes->get('categories',              'Admin::categories');
     $routes->post('categories/store',       'Admin::storeCategory');
+    $routes->post('categories/update/(:num)', 'Admin::updateCategory/$1');
     $routes->post('categories/delete/(:num)', 'Admin::deleteCategory/$1');
 
     // Settings & Reset

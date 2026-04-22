@@ -177,25 +177,19 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
 <?= $this->section('scripts') ?>
 <script>
 function deleteTx(id) {
-    Swal.fire({
-        title: '<?= lang('App.confirm_delete_transaction_title') ?>',
-        text: '<?= lang('App.confirm_delete_transaction_text') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.yes_delete') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b',
-        color: '#f1f5f9',
-    }).then(result => {
-        if (result.isConfirmed) {
+    Modal.show({
+        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.confirm_delete_transaction_title') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.confirm_delete_transaction_text') ?></p>',
+        confirmText: '<?= lang('App.delete') ?>',
+        confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+        onConfirm: () => {
             showLoading();
             fetch(`<?= base_url('transaction/delete/') ?>` + id, { method: 'POST' })
                 .then(r => r.json())
                 .then(data => {
                     hideLoading();
                     if (data.status === 'success') {
+                        Modal.hide();
                         document.getElementById('tx-' + id)?.remove();
                         Toast.fire({ icon: 'success', title: '<?= lang('App.delete_success') ?>' });
                     } else {
@@ -204,7 +198,7 @@ function deleteTx(id) {
                 })
                 .catch(err => {
                     hideLoading();
-                    Toast.fire({ icon: 'error', title: '<?= lang('App.error_occurred') ?>' });
+                    Toast.fire({ icon: 'error', title: 'Error' });
                 });
         }
     });

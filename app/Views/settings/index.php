@@ -136,18 +136,12 @@ function confirmReset() {
         return;
     }
 
-    Swal.fire({
-        title: '<?= lang('App.reset_critical_title') ?>',
-        text: '<?= lang('App.reset_critical_text') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.yes_reset_everything') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b', color: '#f1f5f9',
-    }).then((result) => {
-        if (result.isConfirmed) {
+    Modal.show({
+        title: '<ion-icon name="alert-circle-outline" class="text-red-500"></ion-icon> <?= lang('App.reset_critical_title') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.reset_critical_text') ?></p>',
+        confirmText: '<?= lang('App.yes_reset_everything') ?>',
+        confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+        onConfirm: () => {
             showLoading();
             document.getElementById('resetForm').submit();
         }
@@ -155,18 +149,13 @@ function confirmReset() {
 }
 
 function confirmBackup() {
-    Swal.fire({
-        title: '<?= lang('App.backup_confirm_title') ?>',
-        text: '<?= lang('App.backup_confirm_text') ?>',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.yes_download_now') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b', color: '#f1f5f9',
-    }).then((result) => {
-        if (result.isConfirmed) {
+    Modal.show({
+        title: '<ion-icon name="cloud-download-outline" class="text-emerald-500"></ion-icon> <?= lang('App.backup_confirm_title') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.backup_confirm_text') ?></p>',
+        confirmText: '<?= lang('App.yes_download_now') ?>',
+        confirmColorClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20',
+        onConfirm: () => {
+            Modal.hide();
             window.location.href = '<?= base_url('admin/settings/backup') ?>';
         }
     });

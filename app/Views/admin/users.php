@@ -6,7 +6,12 @@
         <ion-icon name="people-outline" class="text-emerald-400"></ion-icon>
         <?= lang('App.manage_users') ?>
     </h2>
-    <span class="text-sm text-slate-500 dark:text-slate-400"><?= count($users) ?> <?= lang('App.registered_users') ?></span>
+    <div class="flex items-center gap-3">
+        <span class="hidden sm:inline text-sm text-slate-500 dark:text-slate-400"><?= count($users) ?> <?= lang('App.registered_users') ?></span>
+        <button onclick="addUser()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+            <ion-icon name="add-outline" class="text-lg"></ion-icon> <?= lang('App.add') ?> <?= lang('App.user') ?>
+        </button>
+    </div>
 </div>
 
 <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
@@ -139,181 +144,75 @@
 <script>
 function toggleUser(id, el) {
     const isNowChecked = el.checked;
-    Swal.fire({
-        title: `User?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: isNowChecked ? '#10b981' : '#f97316',
-        cancelButtonColor: '#475569',
-        confirmButtonText: `Ya!`,
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b', color: '#f1f5f9',
-    }).then(r => {
-        if (!r.isConfirmed) {
-            el.checked = !isNowChecked; // Revert
-            return;
-        }
-        showLoading();
-        fetch(`<?= base_url('admin/users/toggle/') ?>${id}`, { method: 'POST' })
-            .then(r => r.json())
-            .then(data => {
-                hideLoading();
-                const sw = document.getElementById('status-switch-'+id);
-                const swM = document.getElementById('status-switch-m-'+id);
-                const txt = document.getElementById('status-text-'+id);
-                const txtM = document.getElementById('status-text-m-'+id);
-                
-                const activeTxt = '<?= lang('App.active') ?>';
-                const inactiveTxt = '<?= lang('App.inactive') ?>';
-
-                // Sync both switches
-                if (sw) sw.checked = data.active;
-                if (swM) swM.checked = data.active;
-
-                if (data.active) {
-                    if (txt) { txt.textContent = activeTxt; txt.classList.remove('text-slate-400'); txt.classList.add('text-emerald-500'); }
-                    if (txtM) { txtM.textContent = activeTxt; txtM.classList.remove('text-slate-400'); txtM.classList.add('text-emerald-500'); }
-                } else {
-                    if (txt) { txt.textContent = inactiveTxt; txt.classList.remove('text-emerald-500'); txt.classList.add('text-slate-400'); }
-                    if (txtM) { txtM.textContent = inactiveTxt; txtM.classList.remove('text-emerald-500'); txtM.classList.add('text-slate-400'); }
-                }
-                Toast.fire({ icon: 'success', title: data.message });
+    Modal.show({
+        title: '<ion-icon name="help-circle-outline" class="text-indigo-500"></ion-icon> Update Status?',
+        html: '<p class="text-slate-600 dark:text-slate-400">Ubah status aktif user ini?</p>',
+        confirmText: 'Ya, Ubah',
+        confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
+        onConfirm: () => {
+            showLoading();
+            fetch(`<?= base_url('admin/users/toggle/') ?>${id}`, { 
+                method: 'POST',
+                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
             })
-            .catch(err => {
-                hideLoading();
-                Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' });
-            });
-    });
-}
-
-function editUser(user) {
-    Swal.fire({
-        title: '<?= lang('App.edit_user') ?>',
-        html: `
-            <div class="space-y-4 text-left">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Full Name</label>
-                    <input id="swal-full-name" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" value="${user.full_name || ''}">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Username</label>
-                    <input id="swal-username" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" value="${user.username}">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</label>
-                    <input id="swal-email" type="email" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" value="${user.email}">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Role</label>
-                    <select id="swal-role" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all">
-                        <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
-                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                    </select>
-                </div>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: '<?= lang('App.save_changes') ?>',
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#475569',
-        background: '#1e293b', color: '#f1f5f9',
-        preConfirm: () => {
-            return {
-                full_name: document.getElementById('swal-full-name').value,
-                username: document.getElementById('swal-username').value,
-                email: document.getElementById('swal-email').value,
-                role: document.getElementById('swal-role').value
-            }
-        }
-    }).then(result => {
-        if (result.isConfirmed) {
-            showLoading();
-            const formData = new FormData();
-            formData.append('full_name', result.value.full_name);
-            formData.append('username', result.value.username);
-            formData.append('email', result.value.email);
-            formData.append('role', result.value.role);
-
-            fetch(`<?= base_url('admin/users/update/') ?>${user.id}`, { method: 'POST', body: formData })
                 .then(r => r.json())
                 .then(data => {
                     hideLoading();
-                    if (data.status === 'success') {
-                        Toast.fire({ icon: 'success', title: data.message }).then(() => location.reload());
+                    Modal.hide();
+                    const sw = document.getElementById('status-switch-'+id);
+                    const swM = document.getElementById('status-switch-m-'+id);
+                    const txt = document.getElementById('status-text-'+id);
+                    const txtM = document.getElementById('status-text-m-'+id);
+                    
+                    const activeTxt = '<?= lang('App.active') ?>';
+                    const inactiveTxt = '<?= lang('App.inactive') ?>';
+
+                    if (sw) sw.checked = data.active;
+                    if (swM) swM.checked = data.active;
+
+                    if (data.active) {
+                        if (txt) { txt.textContent = activeTxt; txt.classList.remove('text-slate-400'); txt.classList.add('text-emerald-500'); }
+                        if (txtM) { txtM.textContent = activeTxt; txtM.classList.remove('text-slate-400'); txtM.classList.add('text-emerald-500'); }
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Error', html: data.message, background: '#1e293b', color: '#f1f5f9' });
+                        if (txt) { txt.textContent = inactiveTxt; txt.classList.remove('text-emerald-500'); txt.classList.add('text-slate-400'); }
+                        if (txtM) { txtM.textContent = inactiveTxt; txtM.classList.remove('text-emerald-500'); txtM.classList.add('text-slate-400'); }
                     }
+                    Toast.fire({ icon: 'success', title: data.message });
                 })
-                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' }); });
-        }
-    });
-}
-
-function changePassword(id) {
-    Swal.fire({
-        title: '<?= lang('App.change_password') ?>',
-        html: `
-            <div class="text-left">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">New Password</label>
-                <input id="swal-password" type="password" class="w-full h-11 px-4 rounded-xl bg-slate-700 border-none text-white text-sm focus:ring-2 focus:ring-emerald-500 transition-all" placeholder="Min 6 chars">
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: '<?= lang('App.update_password') ?>',
-        confirmButtonColor: '#f59e0b',
-        cancelButtonColor: '#475569',
-        background: '#1e293b', color: '#f1f5f9',
-        preConfirm: () => { return document.getElementById('swal-password').value; }
-    }).then(result => {
-        if (result.isConfirmed) {
-            if (!result.value || result.value.length < 6) {
-                Toast.fire({ icon: 'error', title: 'Password min 6 chars!' });
-                return;
-            }
-            showLoading();
-            const formData = new FormData();
-            formData.append('password', result.value);
-
-            fetch(`<?= base_url('admin/users/password/') ?>${id}`, { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
+                .catch(err => {
                     hideLoading();
-                    if (data.status === 'success') {
-                        Toast.fire({ icon: 'success', title: data.message });
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Error', html: data.message, background: '#1e293b', color: '#f1f5f9' });
-                    }
-                })
-                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' }); });
+                    el.checked = !isNowChecked;
+                    Toast.fire({ icon: 'error', title: 'Error' });
+                });
         }
     });
 }
 
 function deleteUser(id) {
-    Swal.fire({
-        title: '<?= lang('App.delete_user_confirm') ?>',
-        text: '<?= lang('App.delete_user_desc') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.delete_yes') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b', color: '#f1f5f9',
-    }).then(r => {
-        if (!r.isConfirmed) return;
-        showLoading();
-        fetch(`<?= base_url('admin/users/delete/') ?>${id}`, { method: 'POST' })
-            .then(r => r.json())
-            .then(data => {
-                hideLoading();
-                document.getElementById('user-row-'+id)?.remove();
-                Toast.fire({ icon: 'success', title: data.message });
+    Modal.show({
+        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.delete_user') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400">Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.</p>',
+        confirmText: '<?= lang('App.delete') ?>',
+        confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+        onConfirm: () => {
+            showLoading();
+            fetch(`<?= base_url('admin/users/delete/') ?>${id}`, { 
+                method: 'POST',
+                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
             })
-            .catch(err => {
-                hideLoading();
-                Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' });
-            });
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Modal.hide();
+                        document.getElementById('user-row-'+id)?.remove();
+                        Toast.fire({ icon: 'success', title: data.message });
+                    } else {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
     });
 }
 </script>

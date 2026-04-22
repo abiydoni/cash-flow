@@ -29,6 +29,39 @@ class Admin extends BaseController
         return view('admin/users', ['users' => $users]);
     }
 
+    public function storeUser()
+    {
+        $rules = [
+            'username'  => 'required|min_length[3]|max_length[50]|is_unique[users.username]',
+            'email'     => 'required|valid_email|is_unique[users.email]',
+            'full_name' => 'required|min_length[3]',
+            'password'  => 'required|min_length[6]',
+            'role'      => 'required|in_list[admin,user]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
+        }
+
+        $userId = $this->userModel->insert([
+            'username'  => $this->request->getPost('username'),
+            'email'     => $this->request->getPost('email'),
+            'password'  => $this->request->getPost('password'),
+            'role'      => $this->request->getPost('role'),
+            'is_active' => 1,
+        ]);
+
+        if ($userId) {
+            $this->profileModel->insert([
+                'user_id'   => $userId,
+                'full_name' => $this->request->getPost('full_name'),
+                'currency'  => 'IDR',
+            ]);
+        }
+
+        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+    }
+
     public function toggleUser(int $id)
     {
         $user = $this->userModel->find($id);
@@ -139,7 +172,7 @@ class Admin extends BaseController
         ];
 
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
         $this->catModel->insert([
@@ -151,7 +184,33 @@ class Admin extends BaseController
             'is_active' => 1,
         ]);
 
-        return redirect()->to('/admin/categories')->with('success', lang('App.save_success'));
+        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+    }
+
+    public function updateCategory(int $id)
+    {
+        $category = $this->catModel->find($id);
+        if (!$category) {
+            return redirect()->to('/admin/categories')->with('error', lang('App.not_found'));
+        }
+
+        $rules = [
+            'name'  => 'required|min_length[2]',
+            'type'  => 'required|in_list[income,expense]',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $this->catModel->update($id, [
+            'name'  => $this->request->getPost('name'),
+            'type'  => $this->request->getPost('type'),
+            'icon'  => $this->request->getPost('icon') ?? 'wallet-outline',
+            'color' => $this->request->getPost('color') ?? '#6366f1',
+        ]);
+
+        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
     }
 
     public function deleteCategory(int $id)

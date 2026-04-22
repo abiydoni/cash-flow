@@ -6,40 +6,14 @@
         <ion-icon name="card-outline" class="text-emerald-400"></ion-icon>
         <?= lang('App.dues_type') ?>
     </h2>
+    <button onclick="addDuesType()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+        <ion-icon name="add-outline" class="text-lg"></ion-icon> <?= lang('App.add') ?> <?= lang('App.dues_type') ?>
+    </button>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <!-- Add Dues Type Form -->
-    <div class="lg:col-span-1">
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-            <h3 class="text-sm font-semibold text-slate-800 dark:text-white mb-4" id="formTitle"><?= lang('App.add_dues_type') ?></h3>
-            <form id="duesTypeForm" action="<?= base_url('duestype/store') ?>" method="POST" class="space-y-4">
-                <?= csrf_field() ?>
-                <input type="hidden" name="id" id="duesTypeId">
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.dues_name') ?> <span class="text-red-400">*</span></label>
-                    <input name="name" id="duesTypeName" type="text" value="<?= esc(old('name')) ?>" placeholder="Contoh: Iuran Bulanan Wajib"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500" required>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.standard_tariff') ?> (IDR) <span class="text-red-400">*</span></label>
-                    <input name="amount" id="duesTypeAmount" type="number" step="0.01" value="<?= esc(old('amount', 0)) ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500" required>
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white font-semibold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
-                        <ion-icon name="save-outline"></ion-icon> <?= lang('App.save') ?>
-                    </button>
-                    <button type="button" onclick="resetForm()" id="btnReset" class="hidden bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-4 rounded-xl">
-                        <ion-icon name="close-outline"></ion-icon>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+<div class="w-full">
     <!-- Dues Types List Table -->
-    <div class="lg:col-span-2">
+    <div>
         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-xl">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm border-collapse">
@@ -92,57 +66,109 @@
 
 <?= $this->section('scripts') ?>
 <script>
-function editDuesType(data) {
-    document.getElementById('formTitle').innerText = '<?= lang('App.edit_dues_type') ?>';
-    document.getElementById('duesTypeId').value = data.id;
-    document.getElementById('duesTypeName').value = data.name;
-    document.getElementById('duesTypeAmount').value = data.amount;
-    document.getElementById('btnReset').classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+function addDuesType() {
+    Modal.show({
+        title: '<ion-icon name="add-circle-outline" class="text-emerald-500"></ion-icon> <?= lang('App.add') ?> <?= lang('App.dues_type') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.dues_name') ?></label>
+                    <input id="modal-name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="e.g. Iuran Kebersihan">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.standard_tariff') ?> (IDR)</label>
+                    <input id="modal-amount" type="number" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="0.00">
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.add') ?>',
+        confirmColorClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20',
+        onConfirm: () => {
+            const data = {
+                name: document.getElementById('modal-name').value,
+                amount: document.getElementById('modal-amount').value
+            };
+            if(!data.name) { Toast.fire({ icon: 'error', title: 'Name is required' }); return; }
+            submitDuesType(data);
+        }
+    });
 }
 
-function resetForm() {
-    document.getElementById('formTitle').innerText = '<?= lang('App.add_dues_type') ?>';
-    document.getElementById('duesTypeId').value = '';
-    document.getElementById('duesTypeForm').reset();
-    document.getElementById('btnReset').classList.add('hidden');
+function editDuesType(dt) {
+    Modal.show({
+        title: '<ion-icon name="create-outline" class="text-indigo-500"></ion-icon> <?= lang('App.edit') ?> <?= lang('App.dues_type') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.dues_name') ?></label>
+                    <input id="modal-name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${dt.name}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.standard_tariff') ?> (IDR)</label>
+                    <input id="modal-amount" type="number" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${dt.amount}">
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.save_changes') ?>',
+        confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
+        onConfirm: () => {
+            const data = {
+                id: dt.id,
+                name: document.getElementById('modal-name').value,
+                amount: document.getElementById('modal-amount').value
+            };
+            if(!data.name) { Toast.fire({ icon: 'error', title: 'Name is required' }); return; }
+            submitDuesType(data);
+        }
+    });
+}
+
+function submitDuesType(data) {
+    showLoading();
+    const formData = new FormData();
+    if(data.id) formData.append('id', data.id);
+    formData.append('name', data.name);
+    formData.append('amount', data.amount);
+
+    fetch(`<?= base_url('duestype/store') ?>`, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(res => {
+            hideLoading();
+            if (res.status === 'success') {
+                Modal.hide();
+                Toast.fire({ icon: 'success', title: res.message }).then(() => location.reload());
+            } else {
+                Toast.fire({ icon: 'error', title: res.message });
+            }
+        })
+        .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
 }
 
 function deleteDuesType(id) {
-    Swal.fire({
-        title: '<?= lang('App.confirm_delete_duestype_title') ?>',
-        text: '<?= lang('App.confirm_delete_duestype_text') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.yes_delete') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        ...getSwalConfig(false)
-    }).then(r => {
-        if (!r.isConfirmed) return;
-        showLoading();
-        fetch(`<?= base_url('duestype/delete/') ?>${id}`, { 
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
-            }
-        })
-            .then(r => r.json())
-            .then(data => {
-                hideLoading();
-                if (data.status === 'success') {
-                    document.getElementById('dtype-'+id)?.remove();
-                    Toast.fire({ icon: 'success', title: data.message });
-                } else {
-                    Toast.fire({ icon: 'error', title: data.message });
-                }
+    Modal.show({
+        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.confirm_delete_duestype_title') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.confirm_delete_duestype_text') ?></p>',
+        confirmText: '<?= lang('App.delete') ?>',
+        confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+        onConfirm: () => {
+            showLoading();
+            fetch(`<?= base_url('duestype/delete/') ?>${id}`, { 
+                method: 'POST',
+                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
             })
-            .catch(err => {
-                hideLoading();
-                Toast.fire({ icon: 'error', title: '<?= lang('App.error_occurred') ?>' });
-            });
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Modal.hide();
+                        document.getElementById('dtype-'+id)?.remove();
+                        Toast.fire({ icon: 'success', title: data.message });
+                    } else {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
     });
 }
 </script>

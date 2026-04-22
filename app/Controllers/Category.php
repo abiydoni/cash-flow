@@ -48,6 +48,32 @@ class Category extends BaseController
         return redirect()->to('/category')->with('success', lang('App.save_success'));
     }
 
+    public function update(int $id)
+    {
+        $category = $this->catModel->find($id);
+        if (!$category || $category['user_id'] != session('user_id')) {
+            return redirect()->to('/category')->with('error', lang('App.error'));
+        }
+
+        $rules = [
+            'name'  => 'required|min_length[2]',
+            'type'  => 'required|in_list[income,expense]',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $this->catModel->update($id, [
+            'name'  => $this->request->getPost('name'),
+            'type'  => $this->request->getPost('type'),
+            'icon'  => $this->request->getPost('icon') ?? 'wallet-outline',
+            'color' => $this->request->getPost('color') ?? '#6366f1',
+        ]);
+
+        return redirect()->to('/category')->with('success', lang('App.save_success'));
+    }
+
     public function delete(int $id)
     {
         $category = $this->catModel->find($id);

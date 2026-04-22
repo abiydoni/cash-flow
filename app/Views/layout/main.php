@@ -479,20 +479,14 @@ function toggleTheme() {
 
 function confirmLogout(e) {
     e.preventDefault();
-    const isDark = document.documentElement.classList.contains('dark');
-    Swal.fire({
-        title: '<?= lang('App.logout') ?>?',
-        text: '<?= lang('App.logout_confirm') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#ef4444',
-        confirmButtonText: '<?= lang('App.logout_yes') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: isDark ? '#1e293b' : '#ffffff',
-        color: isDark ? '#f1f5f9' : '#1e293b',
-    }).then((result) => {
-        if (result.isConfirmed) window.location = '<?= base_url('auth/logout') ?>';
+    Modal.show({
+        title: '<ion-icon name="log-out-outline" class="text-emerald-500"></ion-icon> <?= lang('App.logout') ?>?',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.logout_confirm') ?></p>',
+        confirmText: '<?= lang('App.logout_yes') ?>',
+        confirmColorClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20',
+        onConfirm: () => {
+            window.location = '<?= base_url('auth/logout') ?>';
+        }
     });
 }
 
@@ -527,6 +521,88 @@ function getSwalConfig(isToast = true) {
 
 // Global Toast instance
 window.Toast = Swal.mixin(getSwalConfig(true));
+</script>
+
+<!-- Custom Premium Modal Overlay -->
+<div id="antigravityModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 transition-all duration-300">
+    <!-- Backdrop -->
+    <div id="modalBackdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" onclick="Modal.hide()"></div>
+    
+    <!-- Modal Content -->
+    <div id="modalContainer" class="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transform scale-95 opacity-0 transition-all duration-300">
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+            <h3 id="modalTitle" class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2"></h3>
+            <button onclick="Modal.hide()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors">
+                <ion-icon name="close-outline" class="text-xl"></ion-icon>
+            </button>
+        </div>
+        
+        <!-- Body -->
+        <div id="modalBody" class="px-6 py-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <!-- Dynamic content here -->
+        </div>
+        
+        <!-- Footer -->
+        <div id="modalFooter" class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-end gap-3">
+            <button id="modalCancelBtn" onclick="Modal.hide()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <?= lang('App.cancel') ?>
+            </button>
+            <button id="modalConfirmBtn" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-lg">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const Modal = {
+    show: function({ title, html, confirmText, confirmColorClass, onConfirm, showCancel = true }) {
+        const modal = document.getElementById('antigravityModal');
+        const backdrop = document.getElementById('modalBackdrop');
+        const container = document.getElementById('modalContainer');
+        const titleEl = document.getElementById('modalTitle');
+        const bodyEl = document.getElementById('modalBody');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+        
+        titleEl.innerHTML = title || 'Notification';
+        bodyEl.innerHTML = html || '';
+        confirmBtn.innerText = confirmText || 'Confirm';
+        confirmBtn.className = `px-6 py-2.5 rounded-xl text-sm font-bold text-white dark:text-slate-900 transition-all active:scale-95 shadow-lg ${confirmColorClass || 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20'}`;
+        
+        cancelBtn.style.display = showCancel ? 'block' : 'none';
+        
+        confirmBtn.onclick = () => {
+            if (onConfirm) onConfirm();
+        };
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        setTimeout(() => {
+            backdrop.classList.remove('opacity-0');
+            container.classList.remove('scale-95', 'opacity-0');
+        }, 10);
+    },
+    hide: function() {
+        const modal = document.getElementById('antigravityModal');
+        const backdrop = document.getElementById('modalBackdrop');
+        const container = document.getElementById('modalContainer');
+        if(!modal) return;
+        
+        backdrop.classList.add('opacity-0');
+        container.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
+};
+
+// Replace SweetAlert Global Confirm (Optional Override)
+// window.confirm = (msg) => { ... }; 
 </script>
 
 <!-- Master Loading Overlay -->

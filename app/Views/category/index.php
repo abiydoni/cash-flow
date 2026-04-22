@@ -7,7 +7,7 @@
         <h2 class="text-xl font-bold text-slate-800 dark:text-white leading-tight"><?= lang('App.manage_personal_categories') ?></h2>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1"><?= lang('App.manage_categories_desc') ?></p>
     </div>
-    <button onclick="document.getElementById('modalAddCategory').classList.remove('hidden')" class="bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+    <button onclick="addCat()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2">
         <ion-icon name="add-outline" class="text-lg"></ion-icon> <?= lang('App.new_category') ?>
     </button>
 </div>
@@ -19,12 +19,13 @@
                 <tr>
                     <th class="px-3 sm:px-6 py-4 font-semibold"><?= lang('App.category_name') ?></th>
                     <th class="px-3 sm:px-6 py-4 font-semibold"><?= lang('App.type') ?></th>
+                    <th class="px-3 sm:px-6 py-4 font-semibold text-right"><?= lang('App.actions') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
                 <?php if(empty($categories)): ?>
                 <tr>
-                    <td colspan="2" class="px-3 sm:px-6 py-8 text-center text-slate-400 dark:text-slate-500">
+                    <td colspan="3" class="px-3 sm:px-6 py-8 text-center text-slate-400 dark:text-slate-500">
                         <ion-icon name="pricetags-outline" class="text-4xl mb-2 opacity-50"></ion-icon>
                         <p><?= lang('App.category_no_data') ?></p>
                     </td>
@@ -54,6 +55,20 @@
                                 </span>
                             <?php endif; ?>
                         </td>
+                        <td class="px-3 sm:px-6 py-4 text-right">
+                            <?php if($cat['user_id'] == session('user_id')): ?>
+                            <div class="flex items-center justify-end gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick='editCat(<?= json_encode($cat) ?>)' class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.edit') ?>">
+                                    <ion-icon name="create-outline"></ion-icon>
+                                </button>
+                                <button onclick="deleteCat(<?= $cat['id'] ?>)" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.delete') ?>">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                </button>
+                            </div>
+                            <?php else: ?>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic opacity-50"><?= lang('App.system') ?></span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -62,108 +77,141 @@
     </div>
 </div>
 
-<!-- Modal Add -->
-<div id="modalAddCategory" class="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300" style="display: none;">
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300">
-        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
-            <h3 class="font-bold text-slate-800 dark:text-white text-lg"><?= lang('App.new_category') ?></h3>
-            <button onclick="closeModal()" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-white transition-colors">
-                <ion-icon name="close-outline" class="text-2xl"></ion-icon>
-            </button>
-        </div>
-        <form action="<?= base_url('category/store') ?>" method="POST" class="p-6">
-            <div class="space-y-5">
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+function addCat() {
+    Modal.show({
+        title: '<ion-icon name="pricetag-outline" class="text-emerald-500"></ion-icon> <?= lang('App.new_category') ?>',
+        html: `
+            <div class="space-y-4 text-left">
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2"><?= lang('App.category_name') ?></label>
-                    <input type="text" name="name" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium placeholder-slate-500" placeholder="<?= lang('App.category_name') ?>...">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.category_name') ?></label>
+                    <input id="modal-name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="<?= lang('App.category_name') ?>...">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2"><?= lang('App.type') ?></label>
-                    <select name="type" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium appearance-none">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.type') ?></label>
+                    <select id="modal-type" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none">
                         <option value="expense"><?= lang('App.expense') ?></option>
                         <option value="income"><?= lang('App.income') ?></option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2"><?= lang('App.icons_hint') ?></label>
-                        <input type="text" name="icon" value="wallet-outline" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm">
-                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1"><?= lang('App.search') ?> di <a href="https://ionic.io/ionicons" target="_blank" class="text-emerald-400 hover:underline">ionic.io/ionicons</a></p>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5">Icon</label>
+                        <input id="modal-icon" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" value="wallet-outline">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2"><?= lang('App.primary_color') ?></label>
-                        <div class="flex items-center gap-3">
-                            <input type="color" name="color" value="#6366f1" required class="h-11 w-11 rounded-xl cursor-pointer border-0 p-0 bg-transparent">
-                            <span class="text-sm font-mono text-slate-500 dark:text-slate-400"><?= lang('App.select_color') ?></span>
-                        </div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.primary_color') ?></label>
+                        <input id="modal-color" type="color" class="w-full h-11 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none p-1" value="#6366f1">
                     </div>
                 </div>
             </div>
-            <div class="mt-8 flex gap-3">
-                <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 rounded-xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:bg-slate-600 transition-colors"><?= lang('App.cancel') ?></button>
-                <button type="submit" class="flex-1 px-4 py-3 rounded-xl font-semibold text-slate-800 dark:text-white bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all"><?= lang('App.save') ?></button>
+        `,
+        confirmText: '<?= lang('App.save') ?>',
+        confirmColorClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20',
+        onConfirm: () => {
+            const data = {
+                name: document.getElementById('modal-name').value,
+                type: document.getElementById('modal-type').value,
+                icon: document.getElementById('modal-icon').value,
+                color: document.getElementById('modal-color').value
+            };
+            if(!data.name) { Toast.fire({ icon: 'error', title: 'Name is required' }); return; }
+            submitCat(data);
+        }
+    });
+}
+
+function editCat(cat) {
+    Modal.show({
+        title: '<ion-icon name="create-outline" class="text-indigo-500"></ion-icon> <?= lang('App.edit_category') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.category_name') ?></label>
+                    <input id="modal-name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${cat.name}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.type') ?></label>
+                    <select id="modal-type" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none">
+                        <option value="expense" ${cat.type === 'expense' ? 'selected' : ''}><?= lang('App.expense') ?></option>
+                        <option value="income" ${cat.type === 'income' ? 'selected' : ''}><?= lang('App.income') ?></option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5">Icon</label>
+                        <input id="modal-icon" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${cat.icon}">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.primary_color') ?></label>
+                        <input id="modal-color" type="color" class="w-full h-11 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none p-1" value="${cat.color}">
+                    </div>
+                </div>
             </div>
-        </form>
-    </div>
-</div>
+        `,
+        confirmText: '<?= lang('App.save_changes') ?>',
+        confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
+        onConfirm: () => {
+            const data = {
+                id: cat.id,
+                name: document.getElementById('modal-name').value,
+                type: document.getElementById('modal-type').value,
+                icon: document.getElementById('modal-icon').value,
+                color: document.getElementById('modal-color').value
+            };
+            if(!data.name) { Toast.fire({ icon: 'error', title: 'Name is required' }); return; }
+            submitCat(data);
+        }
+    });
+}
 
-<?= $this->endSection() ?>
+function submitCat(data) {
+    showLoading();
+    const formData = new FormData();
+    Object.keys(data).forEach(key => formData.append(key, data[key]));
 
-<?= $this->section('scripts') ?>
-<script>
-const modal = document.getElementById('modalAddCategory');
-const modalContent = modal.querySelector('div');
+    const url = data.id ? '<?= base_url('category/update/') ?>' + data.id : '<?= base_url('category/store') ?>';
 
-// Fix display transition for modal
-document.querySelector('[onclick="document.getElementById(\'modalAddCategory\').classList.remove(\'hidden\')"]').onclick = function() {
-    modal.style.display = 'flex';
-    // small delay to allow display block to apply before changing opacity
-    setTimeout(() => {
-        modal.classList.remove('hidden');
-        modal.classList.remove('opacity-0');
-        modalContent.classList.remove('scale-95');
-    }, 10);
-};
-
-function closeModal() {
-    modal.classList.add('opacity-0');
-    modalContent.classList.add('scale-95');
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 300);
+    fetch(url, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(res => {
+            hideLoading();
+            if (res.status === 'success') {
+                Modal.hide();
+                Toast.fire({ icon: 'success', title: res.message }).then(() => location.reload());
+            } else {
+                Toast.fire({ icon: 'error', title: res.message });
+            }
+        })
+        .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
 }
 
 function deleteCat(id) {
-    Swal.fire({
-        title: '<?= lang('App.delete_category_confirm') ?>',
-        text: '<?= lang('App.delete_category_desc') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: '<?= lang('App.delete_yes') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        ...getSwalConfig(false)
-    }).then((result) => {
-        if (result.isConfirmed) {
-            showLoading('<?= lang('App.processing') ?>');
-            fetch('<?= base_url('category/delete/') ?>' + id, {
+    Modal.show({
+        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.delete_category_confirm') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.delete_category_desc') ?></p>',
+        confirmText: '<?= lang('App.delete') ?>',
+        confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+        onConfirm: () => {
+            showLoading();
+            fetch('<?= base_url('category/delete/') ?>' + id, { 
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(res => res.json())
             .then(data => {
+                hideLoading();
                 if(data.status === 'success') {
-                    window.location.reload();
+                    Modal.hide();
+                    location.reload();
                 } else {
-                    hideLoading();
                     Toast.fire({ icon: 'error', title: data.message });
                 }
             })
-            .catch(err => {
-                hideLoading();
-                Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' });
-            });
+            .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
         }
     });
 }

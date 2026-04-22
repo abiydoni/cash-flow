@@ -334,241 +334,147 @@
     </div>
 </div>
 
-<!-- Modal Pembayaran -->
-<div id="payModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm no-print">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2rem] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in duration-300">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-slate-800 dark:text-white"><?= lang('App.dues_payment') ?></h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <ion-icon name="close-outline" class="text-2xl"></ion-icon>
-                </button>
-            </div>
-            
-            <form id="payForm" action="<?= base_url('dues/pay') ?>" method="POST" class="space-y-5">
-                <?= csrf_field() ?>
-                <input type="hidden" name="member_id" value="<?= $member['id'] ?>">
-                <input type="hidden" name="dues_type_id" id="modalDuesTypeId">
-                <input type="hidden" name="month" id="modalMonth">
-                <input type="hidden" name="year" value="<?= $year ?>">
-                
-                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-slate-500"><?= lang('App.dues') ?></span>
-                        <span class="font-bold text-emerald-400" id="modalDuesTypeName"></span>
-                    </div>
-                    <div class="flex justify-between text-xs">
-                        <span class="text-slate-500"><?= lang('App.month') ?></span>
-                        <span class="font-bold text-emerald-400" id="modalMonthName"></span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.paid_amount') ?> <span class="text-red-400">*</span></label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">Rp</span>
-                        <input name="amount" id="modalAmount" type="number" step="0.01" required
-                            class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-emerald-500 font-bold transition-all">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.payment_date') ?></label>
-                    <input name="payment_date" type="date" value="<?= date('Y-m-d') ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <div class="pt-2">
-                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-                        <ion-icon name="checkmark-circle-outline" class="text-xl"></ion-icon> <?= lang('App.pay') ?>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Detail Bulan -->
-<div id="monthDetailModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm no-print">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in duration-300">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white"><?= lang('App.dues_detail') ?></h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400" id="detailMonthSubTitle"></p>
-                </div>
-                <button onclick="closeMonthDetailModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <ion-icon name="close-outline" class="text-2xl"></ion-icon>
-                </button>
-            </div>
-            
-            <div id="monthDetailContent" class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-                <!-- Content injected via JS -->
-            </div>
-
-            <div class="mt-8 pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-end">
-                <button onclick="closeMonthDetailModal()" class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-6 py-2 rounded-xl text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
-                    <?= lang('App.close') ?>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-const duesTypes   = <?= json_encode($duesTypes) ?>;
-const paymentGrid = <?= json_encode($paymentGrid) ?>;
-const locale      = '<?= session()->get('locale') == 'en' ? 'en-US' : 'id-ID' ?>';
-const txtTariff   = '<?= lang('App.tariff') ?>';
-const txtError    = '<?= lang('App.error_occurred') ?>';
-const txtFailPay  = '<?= lang('App.fail_pay') ?>';
-
-const duesTypeMap = {
-    'Iuran Wajib': '<?= lang('App.iuran_wajib') ?>',
-    'Regular Due' : '<?= lang('App.regular_due') ?>',
-    'Regular Dues': '<?= lang('App.regular_dues') ?>'
-};
-
 function openMonthDetailModal(monthIdx, monthName) {
-    document.getElementById('detailMonthSubTitle').innerText = `${monthName} ${<?= $year ?>}`;
-    const container = document.getElementById('monthDetailContent');
-    container.innerHTML = '';
-
+    let contentHtml = `<div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">`;
+    
     duesTypes.forEach(dt => {
         const pg = paymentGrid[monthIdx] ? paymentGrid[monthIdx][dt.id] : null;
         const totalPaid = pg ? pg.total_paid : 0;
         const isLunas = totalPaid >= dt.amount;
-        
-        const typeContainer = document.createElement('div');
-        typeContainer.className = 'flex flex-col gap-2 p-4 rounded-2xl border ' + (pg ? 'bg-slate-50/50 dark:bg-slate-900/10 border-slate-200 dark:border-slate-700' : 'bg-slate-50 dark:bg-slate-900/30 border-slate-100 dark:border-slate-700/50');
         
         let statusBadge = pg 
             ? (isLunas ? `<span class="bg-emerald-500 text-slate-800 dark:text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-lg shadow-emerald-500/20"><?= lang('App.lunas') ?></span>` 
                        : `<span class="bg-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-lg shadow-orange-500/20"><?= lang('App.belum_lunas') ?></span>`)
             : `<span class="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-semibold px-2 py-0.5 rounded-full"><?= lang('App.belum_bayar') ?></span>`;
 
-        typeContainer.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div class="flex flex-col">
-                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                        ${duesTypeMap[dt.name] || dt.name}
-                    </span>
-                    <span class="text-[10px] text-slate-500">${txtTariff}: Rp ${parseInt(dt.amount).toLocaleString(locale)}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold ${isLunas ? 'text-emerald-400' : 'text-orange-400'}">Rp ${parseInt(totalPaid).toLocaleString(locale)}</span>
-                    ${statusBadge}
-                </div>
-            </div>
-            ${pg ? `<div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 space-y-2">
-                ${pg.records.map(r => `
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                        <div class="flex flex-col">
-                            <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">Rp ${parseInt(r.amount_paid).toLocaleString(locale)}</span>
-                            <span class="text-[9px] text-slate-400">${new Date(r.payment_date).toLocaleDateString(locale, {day:'2-digit', month:'short', year:'numeric'})}</span>
-                        </div>
-                        <button onclick="deletePayment(${r.id})" class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-all" title="<?= lang('App.delete', [], 'Hapus') ?>"><ion-icon name="trash-outline"></ion-icon></button>
+        contentHtml += `
+            <div class="flex flex-col gap-2 p-4 rounded-2xl border ${pg ? 'bg-slate-100 dark:bg-slate-900/10 border-slate-200 dark:border-slate-700' : 'bg-slate-50 dark:bg-slate-900/30 border-slate-100 dark:border-slate-700/50'}">
+                <div class="flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            ${duesTypeMap[dt.name] || dt.name}
+                        </span>
+                        <span class="text-[10px] text-slate-500">${txtTariff}: Rp ${parseInt(dt.amount).toLocaleString(locale)}</span>
                     </div>
-                `).join('')}
-            </div>` : ''}
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold ${isLunas ? 'text-emerald-400' : 'text-orange-400'}">Rp ${parseInt(totalPaid).toLocaleString(locale)}</span>
+                        ${statusBadge}
+                    </div>
+                </div>
+                ${pg ? `<div class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                    ${pg.records.map(r => `
+                        <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">Rp ${parseInt(r.amount_paid).toLocaleString(locale)}</span>
+                                <span class="text-[9px] text-slate-400">${new Date(r.payment_date).toLocaleDateString(locale, {day:'2-digit', month:'short', year:'numeric'})}</span>
+                            </div>
+                            <button onclick="deletePayment(${r.id})" class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-all" title="<?= lang('App.delete') ?>"><ion-icon name="trash-outline"></ion-icon></button>
+                        </div>
+                    `).join('')}
+                </div>` : ''}
+            </div>
         `;
-        container.appendChild(typeContainer);
     });
+    contentHtml += `</div>`;
 
-    document.getElementById('monthDetailModal').classList.remove('hidden');
-}
-
-function closeMonthDetailModal() {
-    document.getElementById('monthDetailModal').classList.add('hidden');
+    Modal.show({
+        title: `<ion-icon name="list-outline" class="text-indigo-500"></ion-icon> ${monthName} <?= $year ?>`,
+        html: contentHtml,
+        confirmText: '<?= lang('App.close') ?>',
+        confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
+        onConfirm: () => Modal.hide()
+    });
 }
 
 function openPayModal(month, monthName, duesTypeId, duesTypeName, defaultAmount) {
-    document.getElementById('modalMonth').value = month;
-    document.getElementById('modalMonthName').innerText = monthName;
-    document.getElementById('modalDuesTypeId').value = duesTypeId;
-    document.getElementById('modalDuesTypeName').innerText = duesTypeMap[duesTypeName] || duesTypeName;
-    document.getElementById('modalAmount').value = defaultAmount;
-    
-    document.getElementById('payModal').classList.remove('hidden');
-}
+    Modal.show({
+        title: '<ion-icon name="card-outline" class="text-emerald-500"></ion-icon> <?= lang('App.dues_payment') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div class="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-slate-500"><?= lang('App.dues') ?></span>
+                        <span class="font-bold text-emerald-500">${duesTypeMap[duesTypeName] || duesTypeName}</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500"><?= lang('App.month') ?></span>
+                        <span class="font-bold text-emerald-500">${monthName}</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.paid_amount') ?></label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">Rp</span>
+                        <input id="modal-amount" type="number" step="0.01" value="${defaultAmount}" class="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.payment_date') ?></label>
+                    <input id="modal-date" type="date" value="<?= date('Y-m-d') ?>" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none">
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.pay') ?>',
+        confirmColorClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20',
+        onConfirm: () => {
+            const formData = new FormData();
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+            formData.append('member_id', '<?= $member['id'] ?>');
+            formData.append('dues_type_id', duesTypeId);
+            formData.append('month', month);
+            formData.append('year', '<?= $year ?>');
+            formData.append('amount', document.getElementById('modal-amount').value);
+            formData.append('payment_date', document.getElementById('modal-date').value);
 
-function closeModal() {
-    document.getElementById('payModal').classList.add('hidden');
-}
-
-document.getElementById('payForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    showLoading();
-    fetch(this.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(r => r.json())
-    .then(data => {
-        hideLoading();
-        if (data.status === 'success') {
-            closeModal();
-            location.reload();
-        } else {
-            Toast.fire({ icon: 'error', title: data.message || txtError });
-        }
-    })
-    .catch(err => {
-        hideLoading();
-        Toast.fire({ icon: 'error', title: txtFailPay });
-    });
-});
-
-function deletePayment(id) {
-    Swal.fire({
-        title: '<?= lang('App.confirm_delete_payment_title') ?>',
-        text: '<?= lang('App.confirm_delete_payment_text') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.yes_delete') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        ...getSwalConfig(false)
-    }).then(r => {
-        if (!r.isConfirmed) return;
-        showLoading();
-        fetch(`<?= base_url('dues/delete/') ?>${id}`, { 
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
-            }
-        })
+            showLoading();
+            fetch('<?= base_url('dues/pay') ?>', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
             .then(r => r.json())
             .then(data => {
                 hideLoading();
                 if (data.status === 'success') {
+                    Modal.hide();
                     location.reload();
                 } else {
                     Toast.fire({ icon: 'error', title: data.message });
                 }
             })
-            .catch(err => {
-                hideLoading();
-                Toast.fire({ icon: 'error', title: '<?= lang('App.error_occurred') ?>' });
-            });
+            .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
     });
 }
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const payModal = document.getElementById('payModal');
-    const detailModal = document.getElementById('monthDetailModal');
-    if (event.target == payModal) closeModal();
-    if (event.target == detailModal) closeMonthDetailModal();
+function deletePayment(id) {
+    Modal.show({
+        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.confirm_delete_payment_title') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.confirm_delete_payment_text') ?></p>',
+        confirmText: '<?= lang('App.delete') ?>',
+        confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+        onConfirm: () => {
+            showLoading();
+            fetch(`<?= base_url('dues/delete/') ?>${id}`, { 
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+                }
+            })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Modal.hide();
+                        location.reload();
+                    } else {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
+    });
 }
 </script>
 
@@ -598,5 +504,4 @@ window.onclick = function(event) {
     .w-48 { width: 10rem !important; }
 }
 </style>
-
 <?= $this->endSection() ?>

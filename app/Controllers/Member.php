@@ -28,7 +28,7 @@ class Member extends BaseController
         $userId = session()->get('user_id');
         
         if (!$this->validate($this->model->getValidationRules())) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
         $id = $this->request->getPost('id');
@@ -37,7 +37,7 @@ class Member extends BaseController
         if ($id) {
             $existing = $this->model->where('id', $id)->where('user_id', $userId)->first();
             if (!$existing) {
-                return redirect()->to('/member')->with('error', 'Akses ditolak');
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak']);
             }
         }
 
@@ -49,7 +49,7 @@ class Member extends BaseController
             'is_active' => $this->request->getPost('is_active') ?? 1,
         ]);
 
-        return redirect()->to('/member')->with('success', lang('App.save_success'));
+        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
     }
 
     public function delete($id)

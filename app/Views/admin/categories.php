@@ -4,52 +4,16 @@
 <div class="flex items-center justify-between mb-4">
     <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
         <ion-icon name="pricetags-outline" class="text-emerald-400"></ion-icon>
-        <?= lang('App.manage_users') ?> <?= lang('App.category') ?>
+        <?= lang('App.manage_users') ?> <?= lang('App.category') ?> Global
     </h2>
+    <button onclick="addCat()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+        <ion-icon name="add-outline" class="text-lg"></ion-icon> <?= lang('App.add') ?> <?= lang('App.category') ?>
+    </button>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <!-- Add Category Form -->
-    <div class="lg:col-span-1">
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-            <h3 class="text-sm font-semibold text-slate-800 dark:text-white mb-4"><?= lang('App.add') ?> <?= lang('App.category') ?> Global</h3>
-            <form action="<?= base_url('admin/categories/store') ?>" method="POST" class="space-y-4">
-                <?= csrf_field() ?>
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.category_name') ?> <span class="text-red-400">*</span></label>
-                    <input name="name" type="text" value="<?= esc(old('name')) ?>" placeholder="<?= lang('App.category_name') ?>"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500" required>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.type') ?> <span class="text-red-400">*</span></label>
-                    <select name="type" class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500" required>
-                        <option value="income">📈 <?= lang('App.income') ?></option>
-                        <option value="expense">📉 <?= lang('App.expense') ?></option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.icons_hint') ?></label>
-                    <input name="icon" type="text" value="<?= esc(old('icon', 'wallet-outline')) ?>" placeholder="wallet-outline"
-                        class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500">
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1"><?= lang('App.search') ?>: <a href="https://ionic.io/ionicons" target="_blank" class="text-emerald-400">ionic.io/ionicons</a></p>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.primary_color') ?></label>
-                    <div class="flex items-center gap-3">
-                        <input name="color" type="color" value="<?= esc(old('color', '#6366f1')) ?>"
-                            class="w-12 h-10 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer">
-                        <span class="text-xs text-slate-500 dark:text-slate-400"><?= lang('App.select_color') ?></span>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white font-semibold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
-                    <ion-icon name="add-outline"></ion-icon> <?= lang('App.add') ?> <?= lang('App.category') ?>
-                </button>
-            </form>
-        </div>
-    </div>
-
+<div class="w-full">
     <!-- Categories List Table -->
-    <div class="lg:col-span-2">
+    <div>
         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-xl">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm border-collapse">
@@ -115,13 +79,16 @@
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="px-1 sm:px-6 py-2 sm:py-3 text-right">
-                                    <div class="flex justify-end gap-1 sm:gap-1.5">
-                                        <button onclick="deleteCat(<?= $cat['id'] ?>)" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
-                                            <ion-icon name="trash-outline" class="text-[10px] sm:text-xs"></ion-icon>
-                                        </button>
-                                    </div>
-                                </td>
+                                 <td class="px-1 sm:px-6 py-2 sm:py-3 text-right">
+                                     <div class="flex justify-end gap-1 sm:gap-1.5">
+                                         <button onclick='editCat(<?= json_encode($cat) ?>)' class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
+                                             <ion-icon name="create-outline" class="text-[10px] sm:text-xs"></ion-icon>
+                                         </button>
+                                         <button onclick="deleteCat(<?= $cat['id'] ?>)" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
+                                             <ion-icon name="trash-outline" class="text-[10px] sm:text-xs"></ion-icon>
+                                         </button>
+                                     </div>
+                                 </td>
                             </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -136,41 +103,152 @@
 
 <?= $this->section('scripts') ?>
 <script>
-function deleteCat(id) {
-    Swal.fire({
-        title: '<?= lang('App.delete_category_confirm') ?>',
-        text: '<?= lang('App.delete_category_global_warning') ?>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#475569',
-        confirmButtonText: '<?= lang('App.delete_yes') ?>',
-        cancelButtonText: '<?= lang('App.cancel') ?>',
-        background: '#1e293b', color: '#f1f5f9',
-    }).then(r => {
-        if (!r.isConfirmed) return;
-        showLoading();
-        fetch(`<?= base_url('admin/categories/delete/') ?>${id}`, { 
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+function addCat() {
+    Modal.show({
+        title: '<ion-icon name="pricetag-outline" class="text-emerald-500"></ion-icon> <?= lang('App.add') ?> <?= lang('App.category') ?> Global',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.category_name') ?></label>
+                    <input id="modal-name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="e.g. Salary">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.type') ?></label>
+                    <select id="modal-type" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none">
+                        <option value="income">📈 <?= lang('App.income') ?></option>
+                        <option value="expense" selected>📉 <?= lang('App.expense') ?></option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5">Icon</label>
+                        <input id="modal-icon" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" value="wallet-outline">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.primary_color') ?></label>
+                        <input id="modal-color" type="color" class="w-full h-11 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none p-1" value="#6366f1">
+                    </div>
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.add') ?>',
+        confirmColorClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20',
+        onConfirm: () => {
+            const data = {
+                name: document.getElementById('modal-name').value,
+                type: document.getElementById('modal-type').value,
+                icon: document.getElementById('modal-icon').value,
+                color: document.getElementById('modal-color').value
+            };
+            
+            if(!data.name) {
+                Toast.fire({ icon: 'error', title: 'Name is required' });
+                return;
             }
-        })
-            .then(r => r.json())
-            .then(data => {
-                hideLoading();
-                if (data.status === 'success') {
-                    document.getElementById('cat-'+id)?.remove();
-                    Toast.fire({ icon: 'success', title: data.message });
-                } else {
-                    Toast.fire({ icon: 'error', title: data.message });
-                }
+
+            showLoading();
+            const formData = new FormData();
+            Object.keys(data).forEach(key => formData.append(key, data[key]));
+
+            fetch(`<?= base_url('admin/categories/store') ?>`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Modal.hide();
+                        Toast.fire({ icon: 'success', title: data.message }).then(() => location.reload());
+                    } else {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
+    });
+}
+
+function editCat(cat) {
+    Modal.show({
+        title: '<ion-icon name="create-outline" class="text-indigo-500"></ion-icon> <?= lang('App.edit') ?> <?= lang('App.category') ?> Global',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.category_name') ?></label>
+                    <input id="modal-name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${cat.name}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.type') ?></label>
+                    <select id="modal-type" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none">
+                        <option value="income" ${cat.type === 'income' ? 'selected' : ''}>📈 <?= lang('App.income') ?></option>
+                        <option value="expense" ${cat.type === 'expense' ? 'selected' : ''}>📉 <?= lang('App.expense') ?></option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5">Icon</label>
+                        <input id="modal-icon" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${cat.icon}">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.primary_color') ?></label>
+                        <input id="modal-color" type="color" class="w-full h-11 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none p-1" value="${cat.color}">
+                    </div>
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.save_changes') ?>',
+        confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
+        onConfirm: () => {
+            const data = {
+                name: document.getElementById('modal-name').value,
+                type: document.getElementById('modal-type').value,
+                icon: document.getElementById('modal-icon').value,
+                color: document.getElementById('modal-color').value
+            };
+
+            showLoading();
+            const formData = new FormData();
+            Object.keys(data).forEach(key => formData.append(key, data[key]));
+
+            fetch(`<?= base_url('admin/categories/update/') ?>${cat.id}`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Modal.hide();
+                        Toast.fire({ icon: 'success', title: data.message }).then(() => location.reload());
+                    } else {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
+    });
+}
+
+function deleteCat(id) {
+    Modal.show({
+        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.delete_category_confirm') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.delete_category_global_warning') ?></p>',
+        confirmText: '<?= lang('App.delete') ?>',
+        confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+        onConfirm: () => {
+            showLoading();
+            fetch(`<?= base_url('admin/categories/delete/') ?>${id}`, { 
+                method: 'POST',
+                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
             })
-            .catch(err => {
-                hideLoading();
-                Toast.fire({ icon: 'error', title: '<?= lang('App.something_went_wrong') ?>' });
-            });
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Modal.hide();
+                        document.getElementById('cat-'+id)?.remove();
+                        Toast.fire({ icon: 'success', title: data.message });
+                    } else {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
     });
 }
 </script>
