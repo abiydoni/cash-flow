@@ -108,7 +108,7 @@
                         ?>
                         <td class="border border-slate-300 px-1 py-2 text-center">
                             <?php if($paid > 0): ?>
-                                <span class="font-bold text-emerald-600">L</span>
+                                <span class="font-bold text-emerald-600 text-[7px]"><?= number_format($paid, 0, '', '.') ?></span>
                             <?php elseif($isDisabled): ?>
                                 <span class="text-slate-200 text-[7px] italic">-</span>
                             <?php else: ?>
