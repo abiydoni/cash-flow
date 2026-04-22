@@ -58,6 +58,8 @@ class Transaction extends BaseController
         $incomeCategories  = $this->catModel->getForUser($userId, 'income');
         $expenseCategories = $this->catModel->getForUser($userId, 'expense');
 
+        $grandTotalBalance = $this->model->getGrandTotalBalance($userId);
+        
         return view('transaction/index', [
             'transactions'      => $transactions,
             'pager'             => $pager,
@@ -66,6 +68,7 @@ class Transaction extends BaseController
             'expenseCategories' => $expenseCategories,
             'openingBalance'    => $openingBalance,
             'totals'            => $totals,
+            'grandTotalBalance' => $grandTotalBalance,
         ]);
     }
 

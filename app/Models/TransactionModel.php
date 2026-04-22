@@ -167,4 +167,21 @@ class TransactionModel extends Model
         $result = $builder->get()->getRowArray();
         return (float) ($result['opening_balance'] ?? 0);
     }
+
+    /**
+     * Get Grand Total Balance (Actual Current Balance).
+     */
+    public function getGrandTotalBalance(int $userId): float
+    {
+        $result = $this->db->table($this->table)
+            ->select("
+                SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END) -
+                SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END) AS total_balance"
+            )
+            ->where('user_id', $userId)
+            ->where('deleted_at', null)
+            ->get()->getRowArray();
+            
+        return (float) ($result['total_balance'] ?? 0);
+    }
 }

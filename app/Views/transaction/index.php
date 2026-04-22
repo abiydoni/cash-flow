@@ -83,8 +83,8 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
                 <span class="text-red-400 font-semibold">-<?= rupiah($totalOut) ?></span>
             </div>
             <div class="flex items-center justify-between sm:justify-end gap-2 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/50">
-                <span class="text-[9px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold"><?= lang('App.balance') ?><?= $openingBalance !== null ? ' (Total)' : '' ?></span>
-                <span class="text-sm font-black <?= $grandTotal >= 0 ? 'text-emerald-400' : 'text-red-400' ?>"><?= rupiah($grandTotal) ?></span>
+                <span class="text-[9px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold"><?= lang('App.balance') ?> (TOTAL)</span>
+                <span class="text-sm font-black <?= $grandTotalBalance >= 0 ? 'text-emerald-400' : 'text-red-400' ?>"><?= rupiah($grandTotalBalance) ?></span>
             </div>
         </div>
 
