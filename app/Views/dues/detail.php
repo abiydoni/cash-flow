@@ -330,6 +330,8 @@
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
 <?= $this->section('scripts') ?>
 <script>
 const duesTypes = <?= json_encode($duesTypes) ?>;
