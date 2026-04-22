@@ -271,12 +271,20 @@ function changePassword(id) {
 function submitUser(data) {
     showLoading();
     const formData = new FormData();
-    Object.keys(data).forEach(key => formData.append(key, data[key]));
+    Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+            formData.append(key, data[key]);
+        }
+    });
     formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
     const url = data.id ? `<?= base_url('admin/users/update/') ?>${data.id}` : `<?= base_url('admin/users/store') ?>`;
 
-    fetch(url, { method: 'POST', body: formData })
+    fetch(url, { 
+        method: 'POST', 
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
         .then(r => r.json())
         .then(res => {
             hideLoading();
@@ -287,7 +295,11 @@ function submitUser(data) {
                 Toast.fire({ icon: 'error', title: res.message });
             }
         })
-        .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        .catch(err => { 
+            hideLoading(); 
+            Toast.fire({ icon: 'error', title: 'Network error or server failure' }); 
+            console.error(err);
+        });
 }
 
 function toggleUser(id, el) {

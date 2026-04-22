@@ -43,21 +43,24 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        $userId = $this->userModel->insert([
+        $userData = [
             'username'  => $this->request->getPost('username'),
             'email'     => $this->request->getPost('email'),
             'password'  => $this->request->getPost('password'),
             'role'      => $this->request->getPost('role'),
             'is_active' => 1,
-        ]);
+        ];
 
-        if ($userId) {
-            $this->profileModel->insert([
-                'user_id'   => $userId,
-                'full_name' => $this->request->getPost('full_name'),
-                'currency'  => 'IDR',
-            ]);
+        if (!$this->userModel->insert($userData)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->userModel->errors())]);
         }
+
+        $userId = $this->userModel->getInsertID();
+        $this->profileModel->insert([
+            'user_id'   => $userId,
+            'full_name' => $this->request->getPost('full_name'),
+            'currency'  => 'IDR',
+        ]);
 
         return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
     }
@@ -69,9 +72,11 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => lang('App.not_found')]);
         }
         $newStatus = $user['is_active'] ? 0 : 1;
-        $this->userModel->update($id, ['is_active' => $newStatus]);
+        if (!$this->userModel->update($id, ['is_active' => $newStatus])) {
+             return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to update status']);
+        }
         return $this->response->setJSON([
-            'status'  => 'success',
+            'status'  =>  'success',
             'message' => $newStatus ? lang('App.user_activated') : lang('App.user_deactivated'),
             'active'  => $newStatus,
         ]);
@@ -82,7 +87,9 @@ class Admin extends BaseController
         if ($id === (int) session()->get('user_id')) {
             return $this->response->setJSON(['status' => 'error', 'message' => lang('App.cannot_delete_self')]);
         }
-        $this->userModel->delete($id);
+        if (!$this->userModel->delete($id)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to delete user']);
+        }
         return $this->response->setJSON(['status' => 'success', 'message' => lang('App.delete_success')]);
     }
 
@@ -102,11 +109,13 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        $this->userModel->update($id, [
+        if (!$this->userModel->update($id, [
             'username' => $this->request->getPost('username'),
             'email'    => $this->request->getPost('email'),
             'role'     => $this->request->getPost('role'),
-        ]);
+        ])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->userModel->errors())]);
+        }
 
         $this->profileModel->where('user_id', $id)->set([
             'full_name' => $this->request->getPost('full_name')
