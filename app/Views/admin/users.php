@@ -142,6 +142,154 @@
 
 <?= $this->section('scripts') ?>
 <script>
+function addUser() {
+    Modal.show({
+        title: '<ion-icon name="person-add-outline" class="text-emerald-500"></ion-icon> <?= lang('App.add') ?> <?= lang('App.user') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.full_name') ?></label>
+                    <input id="modal-full_name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="Full Name...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.username') ?></label>
+                    <input id="modal-username" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="Username...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.email') ?></label>
+                    <input id="modal-email" type="email" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="Email...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.password') ?></label>
+                    <input id="modal-password" type="password" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none" placeholder="Password...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.role') ?></label>
+                    <select id="modal-role" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.save') ?>',
+        confirmColorClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20',
+        onConfirm: () => {
+            const data = {
+                full_name: document.getElementById('modal-full_name').value,
+                username: document.getElementById('modal-username').value,
+                email: document.getElementById('modal-email').value,
+                password: document.getElementById('modal-password').value,
+                role: document.getElementById('modal-role').value
+            };
+            if(!data.username || !data.password) { Toast.fire({ icon: 'error', title: 'Missing required fields' }); return; }
+            submitUser(data);
+        }
+    });
+}
+
+function editUser(u) {
+    Modal.show({
+        title: '<ion-icon name="create-outline" class="text-indigo-500"></ion-icon> <?= lang('App.edit') ?> <?= lang('App.user') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.full_name') ?></label>
+                    <input id="modal-full_name" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${u.full_name || ''}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.username') ?></label>
+                    <input id="modal-username" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${u.username}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.email') ?></label>
+                    <input id="modal-email" type="email" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" value="${u.email}">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.role') ?></label>
+                    <select id="modal-role" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none">
+                        <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
+                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.save_changes') ?>',
+        confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
+        onConfirm: () => {
+            const data = {
+                id: u.id,
+                full_name: document.getElementById('modal-full_name').value,
+                username: document.getElementById('modal-username').value,
+                email: document.getElementById('modal-email').value,
+                role: document.getElementById('modal-role').value
+            };
+            if(!data.username) { Toast.fire({ icon: 'error', title: 'Username is required' }); return; }
+            submitUser(data);
+        }
+    });
+}
+
+function changePassword(id) {
+    Modal.show({
+        title: '<ion-icon name="key-outline" class="text-amber-500"></ion-icon> <?= lang('App.change_password') ?>',
+        html: `
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5"><?= lang('App.new_password') ?></label>
+                    <input id="modal-password" type="password" class="w-full h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all outline-none" placeholder="New Password...">
+                </div>
+            </div>
+        `,
+        confirmText: '<?= lang('App.update_password') ?>',
+        confirmColorClass: 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20',
+        onConfirm: () => {
+            const password = document.getElementById('modal-password').value;
+            if(!password || password.length < 6) { Toast.fire({ icon: 'error', title: 'Password must be at least 6 characters' }); return; }
+            
+            showLoading();
+            const formData = new FormData();
+            formData.append('password', password);
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+            fetch(`<?= base_url('admin/users/password/') ?>${id}`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        Modal.hide();
+                        Toast.fire({ icon: 'success', title: data.message });
+                    } else {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
+                })
+                .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+        }
+    });
+}
+
+function submitUser(data) {
+    showLoading();
+    const formData = new FormData();
+    Object.keys(data).forEach(key => formData.append(key, data[key]));
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+    const url = data.id ? `<?= base_url('admin/users/update/') ?>${data.id}` : `<?= base_url('admin/users/store') ?>`;
+
+    fetch(url, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(res => {
+            hideLoading();
+            if (res.status === 'success') {
+                Modal.hide();
+                Toast.fire({ icon: 'success', title: res.message }).then(() => location.reload());
+            } else {
+                Toast.fire({ icon: 'error', title: res.message });
+            }
+        })
+        .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+}
+
 function toggleUser(id, el) {
     const isNowChecked = el.checked;
     Modal.show({
