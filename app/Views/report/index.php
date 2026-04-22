@@ -47,8 +47,7 @@
     </div>
 
     <!-- Executive Summary Stats -->
-    <!-- Executive Summary Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 print:grid-cols-5 print:gap-4 no-print">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 print:grid-cols-4 print:gap-4 no-print">
         <!-- Opening Balance Card -->
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg relative overflow-hidden group print:rounded-2xl print:border-slate-300">
             <div class="relative">
@@ -81,18 +80,6 @@
                 <div class="mt-2 flex items-center gap-1.5">
                     <div class="w-6 h-6 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 text-[10px]"><ion-icon name="arrow-down-outline"></ion-icon></div>
                     <span class="text-[8px] font-bold text-slate-500 uppercase"><?= lang('App.gross_expense') ?></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Dues Card -->
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg relative overflow-hidden group print:rounded-2xl print:border-slate-300">
-            <div class="relative">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.dues_collected') ?></p>
-                <h3 class="text-sm font-bold text-blue-500 whitespace-nowrap">Rp <?= number_format($duesCollected, 0, ',', '.') ?></h3>
-                <div class="mt-2 flex items-center gap-1.5">
-                    <div class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 text-[10px]"><ion-icon name="people-outline"></ion-icon></div>
-                    <span class="text-[8px] font-bold text-slate-500 uppercase"><?= lang('App.membership') ?></span>
                 </div>
             </div>
         </div>
