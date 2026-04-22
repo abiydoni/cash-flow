@@ -138,29 +138,25 @@ class TransactionModel extends Model
      */
     public function getOpeningBalance(?int $userId, string $month, array $filters = []): float
     {
-        $builder = $this->db->table($this->table)
-            ->select("
-                SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END) -
-                SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END) AS opening_balance"
+        $builder = $this->select("
+                SUM(CASE WHEN type='income' THEN amount ELSE 0 END) -
+                SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS opening_balance"
             )
-            ->join('categories', 'categories.id = transactions.category_id', 'left')
-            ->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m') <", $month)
-            ->where('transactions.deleted_at', null);
+            ->where("DATE_FORMAT(transaction_date, '%Y-%m') <", $month);
 
         if ($userId) {
-            $builder->where('transactions.user_id', $userId);
+            $builder->where('user_id', $userId);
         }
 
         if (!empty($filters['category_id'])) {
-            $builder->where('transactions.category_id', $filters['category_id']);
+            $builder->where('category_id', $filters['category_id']);
         }
         if (!empty($filters['type'])) {
-            $builder->where('transactions.type', $filters['type']);
+            $builder->where('type', $filters['type']);
         }
         if (!empty($filters['search'])) {
             $builder->groupStart()
-                ->like('transactions.description', $filters['search'])
-                ->orLike('categories.name', $filters['search'])
+                ->like('description', $filters['search'])
             ->groupEnd();
         }
 
@@ -173,13 +169,11 @@ class TransactionModel extends Model
      */
     public function getGrandTotalBalance(int $userId): float
     {
-        $result = $this->db->table($this->table)
-            ->select("
-                SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END) -
-                SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END) AS total_balance"
+        $result = $this->select("
+                SUM(CASE WHEN type='income' THEN amount ELSE 0 END) -
+                SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS total_balance"
             )
             ->where('user_id', $userId)
-            ->where('deleted_at', null)
             ->get()->getRowArray();
             
         return (float) ($result['total_balance'] ?? 0);
