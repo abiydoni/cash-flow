@@ -66,52 +66,7 @@
     </div>
 
     <div class="grid grid-cols-1 gap-10">
-        <!-- Dues Breakdown -->
-        <div class="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-[2rem] overflow-hidden shadow-2xl print:rounded-2xl print:border-slate-400">
-            <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 print:bg-slate-100 flex justify-between items-center">
-                <h3 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-widest flex items-center gap-2">
-                    <div class="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
-                    <?= lang('App.dues_collected') ?>
-                </h3>
-                <span class="text-[10px] font-bold text-slate-400"><?= count($dues) ?> <?= lang('App.entries') ?></span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 dark:bg-slate-900/50">
-                            <th class="px-2 py-3 text-[8px] font-bold text-slate-400 uppercase tracking-tighter border-b border-slate-100 dark:border-slate-700"><?= lang('App.member') ?></th>
-                            <th class="px-2 py-3 text-[8px] font-bold text-slate-400 uppercase tracking-tighter border-b border-slate-100 dark:border-slate-700"><?= lang('App.dues_type') ?></th>
-                            <th class="px-2 py-3 text-[8px] font-bold text-slate-400 uppercase tracking-tighter border-b border-slate-100 dark:border-slate-700"><?= lang('App.date') ?></th>
-                            <th class="px-2 py-3 text-[8px] font-bold text-slate-400 uppercase tracking-tighter border-b border-slate-100 dark:border-slate-700 text-right"><?= lang('App.amount') ?></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-[9px]">
-                        <?php if(empty($dues)): ?>
-                            <tr><td colspan="4" class="px-4 py-8 text-center text-slate-400 italic"><?= lang('App.no_data') ?></td></tr>
-                        <?php else: ?>
-                            <?php foreach($dues as $d): ?>
-                                <tr>
-                                    <td class="px-2 py-2 font-bold text-slate-700 dark:text-slate-200"><?= esc($d['member_name']) ?></td>
-                                    <td class="px-2 py-2 text-slate-500"><?= esc($d['dues_name']) ?></td>
-                                    <td class="px-2 py-2 text-slate-500 whitespace-nowrap"><?= date('d/m/y', strtotime($d['payment_date'])) ?></td>
-                                    <td class="px-2 py-2 text-right font-bold text-slate-800 dark:text-white whitespace-nowrap">
-                                        <span class="hidden sm:inline opacity-30 font-normal mr-0.5">Rp</span><?= number_format($d['amount_paid'], 0, ',', '.') ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                    <tfoot class="bg-slate-50 dark:bg-slate-900/50 font-bold border-t border-slate-200 dark:border-slate-700">
-                        <tr>
-                            <td colspan="3" class="px-2 py-3 text-[9px] uppercase tracking-widest text-right text-slate-500"><?= lang('App.summary') ?> Iuran</td>
-                            <td class="px-2 py-3 text-right text-slate-800 dark:text-white text-[9px]">
-                                Rp <?= number_format($duesTotal, 0, ',', '.') ?>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
+
 
         <!-- Comprehensive Transaction List -->
         <div class="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-[2rem] overflow-hidden shadow-2xl print:rounded-2xl print:border-slate-400">
