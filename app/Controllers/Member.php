@@ -41,15 +41,24 @@ class Member extends BaseController
             }
         }
 
-        $this->model->save([
+        $data = [
             'id'        => $id,
             'user_id'   => $userId,
             'name'      => $this->request->getPost('name'),
             'join_date' => $this->request->getPost('join_date'),
             'is_active' => $this->request->getPost('is_active') ?? 1,
-        ]);
+        ];
 
-        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+        $this->model->save($data);
+
+        $savedId = $id ?: $this->model->getInsertID();
+        $savedMember = $this->model->find($savedId);
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => lang('App.save_success'),
+            'member' => $savedMember
+        ]);
     }
 
     public function delete($id)

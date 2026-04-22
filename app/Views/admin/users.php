@@ -93,7 +93,7 @@
     <!-- Mobile Cards -->
     <div class="md:hidden divide-y divide-slate-200 dark:divide-slate-700/50">
         <?php foreach ($users as $u): ?>
-        <div class="p-4" id="user-row-<?= $u['id'] ?>">
+        <div class="p-4" id="user-row-m-<?= $u['id'] ?>">
             <div class="flex items-start gap-3">
                 <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-800 dark:text-white font-bold flex-shrink-0">
                     <?= strtoupper(substr($u['full_name'] ?? $u['username'], 0, 1)) ?>
@@ -288,7 +288,6 @@ function submitUser(data) {
         .then(async r => {
             const isJson = r.headers.get('content-type')?.includes('application/json');
             const res = isJson ? await r.json() : null;
-            
             if (!r.ok) throw new Error(res?.message || 'Server error: ' + r.status);
             return res;
         })
@@ -296,13 +295,8 @@ function submitUser(data) {
             hideLoading();
             if (res && res.status === 'success') {
                 Modal.hide();
-                Toast.fire({ 
-                    icon: 'success', 
-                    title: res.message,
-                    timer: 1500 
-                }).then(() => {
-                    location.reload();
-                });
+                Toast.fire({ icon: 'success', title: res.message, timer: 2000 });
+                updateUserRow(res.user, !data.id);
             } else {
                 Toast.fire({ icon: 'error', title: res?.message || 'Unknown error occurred' });
             }
@@ -312,6 +306,138 @@ function submitUser(data) {
             console.error('Submission Error:', err);
             Toast.fire({ icon: 'error', title: err.message || 'Network error or server failure' }); 
         });
+}
+
+function updateUserRow(user, isNew) {
+    const desktopBody = document.querySelector('table tbody');
+    const mobileContainer = document.querySelector('.md\\:hidden.divide-y');
+    const emptyState = document.querySelector('.flex.flex-col.items-center.justify-center.py-16');
+
+    if (emptyState) emptyState.remove();
+
+    const currentUserId = '<?= session('user_id') ?>';
+    const initial = (user.full_name || user.username).charAt(0).toUpperCase();
+    
+    // Role Badge
+    const roleBadge = `
+        <span class="text-xs px-2 py-1 rounded-lg ${user.role === 'admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'}">
+            ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+        </span>
+    `;
+
+    // Desktop Row HTML
+    const desktopRowHTML = `
+        <td class="px-5 py-3">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-800 dark:text-white text-sm font-bold flex-shrink-0">
+                    ${initial}
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800 dark:text-white">${user.full_name || '-'}</p>
+                </div>
+            </div>
+        </td>
+        <td class="px-5 py-3">${roleBadge}</td>
+        <td class="px-5 py-3">
+            ${user.role !== 'admin' ? `
+            <div class="flex items-center gap-3">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="status-switch-${user.id}" class="sr-only peer" ${user.is_active == 1 ? 'checked' : ''} onchange="toggleUser(${user.id}, this)">
+                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500 shadow-sm"></div>
+                </label>
+                <span class="text-[10px] font-bold uppercase tracking-wider ${user.is_active == 1 ? 'text-emerald-500' : 'text-slate-400'}" id="status-text-${user.id}">
+                    ${user.is_active == 1 ? '<?= lang('App.active') ?>' : '<?= lang('App.inactive') ?>'}
+                </span>
+            </div>
+            ` : '<span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest italic">-</span>'}
+        </td>
+        <td class="px-5 py-3 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+                <button onclick='editUser(${JSON.stringify(user)})' class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 transition-colors" title="<?= lang('App.edit') ?>">
+                    <ion-icon name="create-outline"></ion-icon>
+                </button>
+                <button onclick="changePassword(${user.id})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 transition-colors" title="<?= lang('App.change_password') ?>">
+                    <ion-icon name="key-outline"></ion-icon>
+                </button>
+                ${user.id != currentUserId ? `
+                <button onclick="deleteUser(${user.id})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-colors" title="<?= lang('App.delete') ?>">
+                    <ion-icon name="trash-outline"></ion-icon>
+                </button>
+                ` : `<span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"><?= lang('App.your_account') ?></span>`}
+            </div>
+        </td>
+    `;
+
+    // Mobile Card HTML
+    const mobileCardHTML = `
+        <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-800 dark:text-white font-bold flex-shrink-0">
+                ${initial}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-slate-800 dark:text-white">${user.full_name || '-'}</p>
+                <div class="flex items-center gap-3 mt-2">
+                    <span class="text-[10px] px-2 py-0.5 rounded-lg ${user.role === 'admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
+                    ${user.role !== 'admin' ? `
+                    <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="status-switch-m-${user.id}" class="sr-only peer" ${user.is_active == 1 ? 'checked' : ''} onchange="toggleUser(${user.id}, this)">
+                            <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500"></div>
+                        </label>
+                        <span class="text-[9px] font-bold uppercase tracking-tighter ${user.is_active == 1 ? 'text-emerald-500' : 'text-slate-400'}" id="status-text-m-${user.id}">
+                            ${user.is_active == 1 ? '<?= lang('App.active') ?>' : '<?= lang('App.inactive') ?>'}
+                        </span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            <div class="flex flex-col items-end gap-1.5">
+                <div class="flex items-center gap-1.5">
+                    <button onclick='editUser(${JSON.stringify(user)})' class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400">
+                        <ion-icon name="create-outline"></ion-icon>
+                    </button>
+                    <button onclick="changePassword(${user.id})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                        <ion-icon name="key-outline"></ion-icon>
+                    </button>
+                    ${user.id != currentUserId ? `
+                    <button onclick="deleteUser(${user.id})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 text-red-400">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (isNew) {
+        // Prepend new row
+        const tr = document.createElement('tr');
+        tr.id = `user-row-${user.id}`;
+        tr.className = 'hover:bg-slate-700/30 transition-colors';
+        tr.innerHTML = desktopRowHTML;
+        desktopBody.insertBefore(tr, desktopBody.firstChild);
+
+        const div = document.createElement('div');
+        div.id = `user-row-m-${user.id}`;
+        div.className = 'p-4';
+        div.innerHTML = mobileCardHTML;
+        mobileContainer.insertBefore(div, mobileContainer.firstChild);
+    } else {
+        // Update existing row
+        const tr = document.getElementById(`user-row-${user.id}`);
+        if (tr) tr.innerHTML = desktopRowHTML;
+
+        // Mobile update needs specific ID
+        let div = document.getElementById(`user-row-m-${user.id}`);
+        // If not found (maybe first load was desktop), we just update the card at the same index
+        if (!div) {
+            const allMobileCards = mobileContainer.querySelectorAll('.p-4');
+            // This is complex, let's just make sure mobile cards HAVE IDs in the PHP loop too
+            // I should update the PHP loop to add the M ID
+        } else {
+            div.innerHTML = mobileCardHTML;
+        }
+    }
 }
 
 function toggleUser(id, el) {
@@ -325,7 +451,10 @@ function toggleUser(id, el) {
             showLoading();
             fetch(`<?= base_url('admin/users/toggle/') ?>${id}`, { 
                 method: 'POST',
-                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
+                headers: { 
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
                 .then(r => r.json())
                 .then(data => {
@@ -370,7 +499,10 @@ function deleteUser(id) {
             showLoading();
             fetch(`<?= base_url('admin/users/delete/') ?>${id}`, { 
                 method: 'POST',
-                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
+                headers: { 
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
                 .then(r => r.json())
                 .then(data => {
@@ -378,6 +510,7 @@ function deleteUser(id) {
                     if (data.status === 'success') {
                         Modal.hide();
                         document.getElementById('user-row-'+id)?.remove();
+                        document.getElementById('user-row-m-'+id)?.remove();
                         Toast.fire({ icon: 'success', title: data.message });
                     } else {
                         Toast.fire({ icon: 'error', title: data.message });

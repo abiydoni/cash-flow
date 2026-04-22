@@ -63,7 +63,14 @@ class Admin extends BaseController
             'currency'  => 'IDR',
         ]);
 
-        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+        $newUser = $this->userModel->getUserWithProfile($userId);
+        unset($newUser['password']);
+
+        return $this->response->setJSON([
+            'status'  => 'success', 
+            'message' => lang('App.save_success'),
+            'user'    => $newUser
+        ]);
     }
 
     public function toggleUser(int $id)
@@ -110,19 +117,24 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        // Use skipValidation(true) to avoid issues with unique checks we already handled
         $this->userModel->skipValidation(true)->update($id, [
             'username' => $this->request->getPost('username'),
             'email'    => $this->request->getPost('email'),
             'role'     => $this->request->getPost('role'),
         ]);
 
-        // Use upsert to handle cases where profile might be missing (e.g. for old admin accounts)
         $this->profileModel->upsert($id, [
             'full_name' => $this->request->getPost('full_name')
         ]);
 
-        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+        $updatedUser = $this->userModel->getUserWithProfile($id);
+        unset($updatedUser['password']);
+
+        return $this->response->setJSON([
+            'status'  => 'success', 
+            'message' => lang('App.save_success'),
+            'user'    => $updatedUser
+        ]);
     }
 
     public function changePassword(int $id)
@@ -185,7 +197,7 @@ class Admin extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        $this->catModel->insert([
+        $id = $this->catModel->insert([
             'user_id'   => null, // global
             'name'      => $this->request->getPost('name'),
             'type'      => $this->request->getPost('type'),
@@ -194,14 +206,20 @@ class Admin extends BaseController
             'is_active' => 1,
         ]);
 
-        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+        $category = $this->catModel->find($id);
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => lang('App.save_success'),
+            'category' => $category
+        ]);
     }
 
     public function updateCategory(int $id)
     {
         $category = $this->catModel->find($id);
         if (!$category) {
-            return redirect()->to('/admin/categories')->with('error', lang('App.not_found'));
+            return $this->response->setJSON(['status' => 'error', 'message' => lang('App.not_found')]);
         }
 
         $rules = [
@@ -210,7 +228,7 @@ class Admin extends BaseController
         ];
 
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
         $this->catModel->update($id, [
@@ -220,12 +238,37 @@ class Admin extends BaseController
             'color' => $this->request->getPost('color') ?? '#6366f1',
         ]);
 
-        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+        $category = $this->catModel->find($id);
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => lang('App.save_success'),
+            'category' => $category
+        ]);
+    }
+
+    public function toggleCategory(int $id)
+    {
+        $category = $this->catModel->find($id);
+        if (!$category) return $this->response->setJSON(['status' => 'error', 'message' => lang('App.not_found')]);
+
+        $newStatus = $category['is_active'] ? 0 : 1;
+        $this->catModel->update($id, ['is_active' => $newStatus]);
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => $newStatus ? lang('App.category_activated') : lang('App.category_deactivated'),
+            'active' => $newStatus
+        ]);
     }
 
     public function deleteCategory(int $id)
     {
+        $category = $this->catModel->find($id);
+        if (!$category) return $this->response->setJSON(['status' => 'error', 'message' => lang('App.not_found')]);
+
         $this->catModel->delete($id);
+
         return $this->response->setJSON(['status' => 'success', 'message' => lang('App.delete_success')]);
     }
 }

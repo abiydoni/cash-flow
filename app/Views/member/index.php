@@ -156,19 +156,75 @@ function submitMember(data) {
     formData.append('name', data.name);
     formData.append('join_date', data.join_date);
     formData.append('is_active', data.is_active);
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
-    fetch(`<?= base_url('member/store') ?>`, { method: 'POST', body: formData })
+    fetch(`<?= base_url('member/store') ?>`, { 
+        method: 'POST', 
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
         .then(r => r.json())
         .then(res => {
             hideLoading();
             if (res.status === 'success') {
                 Modal.hide();
-                Toast.fire({ icon: 'success', title: res.message }).then(() => location.reload());
+                Toast.fire({ icon: 'success', title: res.message, timer: 2000 });
+                updateMemberRow(res.member, !data.id);
             } else {
                 Toast.fire({ icon: 'error', title: res.message });
             }
         })
         .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+}
+
+function updateMemberRow(m, isNew) {
+    const tbody = document.querySelector('table tbody');
+    const emptyState = tbody.querySelector('td[colspan]');
+    if (emptyState) emptyState.parentElement.remove();
+
+    const activeTxt = '<?= lang('App.active') ?>';
+    const inactiveTxt = '<?= lang('App.non_active') ?>';
+
+    const rowHTML = `
+        <td class="px-4 py-3">
+            <p class="font-bold text-slate-800 dark:text-white">${m.name}</p>
+            <p class="text-[9px] text-slate-500 opacity-60">ID: #${m.id}</p>
+        </td>
+        <td class="px-3 py-3">
+            <div class="flex items-center justify-center gap-2">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="status-switch-${m.id}" class="sr-only peer" 
+                        ${m.is_active == 1 ? 'checked' : ''} 
+                        onchange="toggleMember(${m.id}, this)">
+                    <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500"></div>
+                </label>
+                <span class="text-[9px] font-bold uppercase tracking-wider ${m.is_active == 1 ? 'text-emerald-500' : 'text-slate-400'}" id="status-text-${m.id}">
+                    ${m.is_active == 1 ? activeTxt : inactiveTxt}
+                </span>
+            </div>
+        </td>
+        <td class="px-4 py-3 text-right">
+            <div class="flex justify-end gap-1.5">
+                <button onclick='editMember(${JSON.stringify(m)})' class="w-7 h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
+                    <ion-icon name="create-outline"></ion-icon>
+                </button>
+                <button onclick="deleteMember(${m.id})" class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
+                    <ion-icon name="trash-outline"></ion-icon>
+                </button>
+            </div>
+        </td>
+    `;
+
+    if (isNew) {
+        const tr = document.createElement('tr');
+        tr.id = `member-${m.id}`;
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group text-[10px]';
+        tr.innerHTML = rowHTML;
+        tbody.insertBefore(tr, tbody.firstChild);
+    } else {
+        const tr = document.getElementById(`member-${m.id}`);
+        if (tr) tr.innerHTML = rowHTML;
+    }
 }
 
 function toggleMember(id, el) {
@@ -182,7 +238,10 @@ function toggleMember(id, el) {
             showLoading();
             fetch(`<?= base_url('member/toggle/') ?>${id}`, { 
                 method: 'POST',
-                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
+                headers: { 
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
                 .then(r => r.json())
                 .then(data => {
@@ -218,7 +277,10 @@ function deleteMember(id) {
             showLoading();
             fetch(`<?= base_url('member/delete/') ?>${id}`, { 
                 method: 'POST',
-                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
+                headers: { 
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
                 .then(r => r.json())
                 .then(data => {

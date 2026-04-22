@@ -41,14 +41,24 @@ class DuesType extends BaseController
             }
         }
 
-        $this->model->save([
+        $data = [
             'id'      => $id,
             'user_id' => $userId,
             'name'    => $this->request->getPost('name'),
             'amount'  => $this->request->getPost('amount'),
-        ]);
+        ];
 
-        return $this->response->setJSON(['status' => 'success', 'message' => lang('App.save_success')]);
+        $this->model->save($data);
+        
+        // Get the real ID if it was a new record
+        $savedId = $id ?: $this->model->getInsertID();
+        $savedType = $this->model->find($savedId);
+
+        return $this->response->setJSON([
+            'status'  => 'success', 
+            'message' => lang('App.save_success'),
+            'dtype'   => $savedType
+        ]);
     }
 
     public function delete($id)

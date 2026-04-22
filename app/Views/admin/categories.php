@@ -149,14 +149,20 @@ function addCat() {
             showLoading();
             const formData = new FormData();
             Object.keys(data).forEach(key => formData.append(key, data[key]));
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
-            fetch(`<?= base_url('admin/categories/store') ?>`, { method: 'POST', body: formData })
+            fetch(`<?= base_url('admin/categories/store') ?>`, { 
+                method: 'POST', 
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
                 .then(r => r.json())
                 .then(data => {
                     hideLoading();
                     if (data.status === 'success') {
                         Modal.hide();
-                        Toast.fire({ icon: 'success', title: data.message }).then(() => location.reload());
+                        Toast.fire({ icon: 'success', title: data.message, timer: 2000 });
+                        updateCatRow(data.category, true);
                     } else {
                         Toast.fire({ icon: 'error', title: data.message });
                     }
@@ -164,6 +170,64 @@ function addCat() {
                 .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
         }
     });
+}
+
+function updateCatRow(cat, isNew) {
+    const tbody = document.querySelector('table tbody');
+    const emptyState = tbody.querySelector('td[colspan]');
+    if (emptyState) emptyState.parentElement.remove();
+
+    const typeBadge = cat.type === 'income' ? 
+        `<span class="inline-flex items-center rounded-full bg-emerald-500/10 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-xs font-semibold text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+            <ion-icon name="trending-up-outline" class="hidden sm:inline-block mr-1"></ion-icon><?= lang('App.income') ?>
+        </span>` : 
+        `<span class="inline-flex items-center rounded-full bg-red-500/10 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-xs font-semibold text-red-400 border border-red-500/20 whitespace-nowrap">
+            <ion-icon name="trending-down-outline" class="hidden sm:inline-block mr-1"></ion-icon><?= lang('App.expense') ?>
+        </span>`;
+
+    const rowHTML = `
+        <td class="px-2 sm:px-6 py-2 sm:py-3">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-slate-800 dark:text-white shadow-lg shrink-0" style="background-color: ${cat.color}">
+                    <ion-icon name="${cat.icon}" class="text-base sm:text-lg"></ion-icon>
+                </div>
+                <div class="min-w-0">
+                    <p class="font-bold text-slate-800 dark:text-white text-[10px] sm:text-sm truncate">${cat.name}</p>
+                    <div class="mt-0 flex items-center gap-1.5">
+                        <p class="text-[8px] sm:text-xs text-slate-500 dark:text-slate-400 truncate opacity-60">ID: #${cat.id}</p>
+                        <div class="sm:hidden">
+                            <span class="bg-slate-100 dark:bg-slate-800 text-slate-500 px-1 py-0.25 rounded text-[7px] font-bold border border-slate-200 dark:border-slate-700">SYS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td class="px-1.5 sm:px-4 py-2 sm:py-3 text-center">${typeBadge}</td>
+        <td class="px-1.5 sm:px-4 py-2 sm:py-3 text-center hidden sm:table-cell">
+            <span class="inline-block bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-xs font-bold border border-slate-200 dark:border-slate-700 whitespace-nowrap uppercase">SYSTEM</span>
+        </td>
+        <td class="px-1 sm:px-6 py-2 sm:py-3 text-right">
+            <div class="flex justify-end gap-1 sm:gap-1.5">
+                <button onclick='editCat(${JSON.stringify(cat)})' class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
+                    <ion-icon name="create-outline" class="text-[10px] sm:text-xs"></ion-icon>
+                </button>
+                <button onclick="deleteCat(${cat.id})" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
+                    <ion-icon name="trash-outline" class="text-[10px] sm:text-xs"></ion-icon>
+                </button>
+            </div>
+        </td>
+    `;
+
+    if (isNew) {
+        const tr = document.createElement('tr');
+        tr.id = `cat-${cat.id}`;
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group';
+        tr.innerHTML = rowHTML;
+        tbody.insertBefore(tr, tbody.firstChild);
+    } else {
+        const tr = document.getElementById(`cat-${cat.id}`);
+        if (tr) tr.innerHTML = rowHTML;
+    }
 }
 
 function editCat(cat) {
@@ -194,7 +258,7 @@ function editCat(cat) {
                 </div>
             </div>
         `,
-        confirmText: '<?= lang('App.save_changes') ?>',
+        confirmText: '<?= lang('App.save') ?>',
         confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
         onConfirm: () => {
             const data = {
@@ -207,14 +271,20 @@ function editCat(cat) {
             showLoading();
             const formData = new FormData();
             Object.keys(data).forEach(key => formData.append(key, data[key]));
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
-            fetch(`<?= base_url('admin/categories/update/') ?>${cat.id}`, { method: 'POST', body: formData })
+            fetch(`<?= base_url('admin/categories/update/') ?>${cat.id}`, { 
+                method: 'POST', 
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
                 .then(r => r.json())
                 .then(data => {
                     hideLoading();
                     if (data.status === 'success') {
                         Modal.hide();
-                        Toast.fire({ icon: 'success', title: data.message }).then(() => location.reload());
+                        Toast.fire({ icon: 'success', title: data.message, timer: 2000 });
+                        updateCatRow(data.category, false);
                     } else {
                         Toast.fire({ icon: 'error', title: data.message });
                     }
@@ -234,7 +304,10 @@ function deleteCat(id) {
             showLoading();
             fetch(`<?= base_url('admin/categories/delete/') ?>${id}`, { 
                 method: 'POST',
-                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
+                headers: { 
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
                 .then(r => r.json())
                 .then(data => {

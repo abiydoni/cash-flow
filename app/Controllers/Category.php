@@ -33,10 +33,10 @@ class Category extends BaseController
         ];
 
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
-        $this->catModel->insert([
+        $id = $this->catModel->insert([
             'user_id'   => session('user_id'), // Save as personal category
             'name'      => $this->request->getPost('name'),
             'type'      => $this->request->getPost('type'),
@@ -45,14 +45,20 @@ class Category extends BaseController
             'is_active' => 1,
         ]);
 
-        return redirect()->to('/category')->with('success', lang('App.save_success'));
+        $category = $this->catModel->find($id);
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => lang('App.save_success'),
+            'category' => $category
+        ]);
     }
 
     public function update(int $id)
     {
         $category = $this->catModel->find($id);
         if (!$category || $category['user_id'] != session('user_id')) {
-            return redirect()->to('/category')->with('error', lang('App.error'));
+            return $this->response->setJSON(['status' => 'error', 'message' => lang('App.error')]);
         }
 
         $rules = [
@@ -61,7 +67,7 @@ class Category extends BaseController
         ];
 
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return $this->response->setJSON(['status' => 'error', 'message' => implode('<br>', $this->validator->getErrors())]);
         }
 
         $this->catModel->update($id, [
@@ -71,7 +77,13 @@ class Category extends BaseController
             'color' => $this->request->getPost('color') ?? '#6366f1',
         ]);
 
-        return redirect()->to('/category')->with('success', lang('App.save_success'));
+        $category = $this->catModel->find($id);
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => lang('App.save_success'),
+            'category' => $category
+        ]);
     }
 
     public function delete(int $id)

@@ -129,19 +129,64 @@ function submitDuesType(data) {
     if(data.id) formData.append('id', data.id);
     formData.append('name', data.name);
     formData.append('amount', data.amount);
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
-    fetch(`<?= base_url('duestype/store') ?>`, { method: 'POST', body: formData })
+    fetch(`<?= base_url('duestype/store') ?>`, { 
+        method: 'POST', 
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
         .then(r => r.json())
         .then(res => {
             hideLoading();
             if (res.status === 'success') {
                 Modal.hide();
-                Toast.fire({ icon: 'success', title: res.message }).then(() => location.reload());
+                Toast.fire({ icon: 'success', title: res.message, timer: 2000 });
+                updateDTypeRow(res.dtype, !data.id);
             } else {
                 Toast.fire({ icon: 'error', title: res.message });
             }
         })
         .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+}
+
+function updateDTypeRow(dt, isNew) {
+    const tbody = document.querySelector('table tbody');
+    const emptyState = tbody.querySelector('td[colspan]');
+    if (emptyState) emptyState.parentElement.remove();
+
+    const amountFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(dt.amount).replace('Rp', 'Rp ');
+
+    const rowHTML = `
+        <td class="px-4 py-3">
+            <p class="font-bold text-slate-800 dark:text-white text-[10px] leading-tight">${dt.name}</p>
+            <p class="text-[9px] text-slate-500 opacity-60">#${dt.id}</p>
+        </td>
+        <td class="px-4 py-3 text-right font-bold text-emerald-500 whitespace-nowrap text-[10px]">
+            ${amountFormatted}
+        </td>
+        <td class="px-3 py-3 text-right">
+            <div class="flex justify-end gap-1">
+                <button onclick='editDuesType(${JSON.stringify(dt)})' class="w-7 h-7 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
+                        <ion-icon name="create-outline"></ion-icon>
+                    </button>
+                    <button onclick="deleteDuesType(${dt.id})" class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                </div>
+            </td>
+    `;
+
+    if (isNew) {
+        const tr = document.createElement('tr');
+        tr.id = `dtype-${dt.id}`;
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group';
+        tr.innerHTML = rowHTML;
+        tbody.insertBefore(tr, tbody.firstChild);
+    } else {
+        const tr = document.getElementById(`dtype-${dt.id}`);
+        if (tr) tr.innerHTML = rowHTML;
+    }
 }
 
 function deleteDuesType(id) {
@@ -154,7 +199,10 @@ function deleteDuesType(id) {
             showLoading();
             fetch(`<?= base_url('duestype/delete/') ?>${id}`, { 
                 method: 'POST',
-                headers: { '<?= csrf_header() ?>': '<?= csrf_hash() ?>' }
+                headers: { 
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
                 .then(r => r.json())
                 .then(data => {

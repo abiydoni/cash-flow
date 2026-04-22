@@ -32,7 +32,7 @@
                 </tr>
                 <?php else: ?>
                     <?php foreach($categories as $cat): ?>
-                    <tr class="hover:bg-slate-700/20 transition-colors group">
+                    <tr class="hover:bg-slate-700/20 transition-colors group" id="cat-<?= $cat['id'] ?>">
                         <td class="px-3 sm:px-6 py-4">
                             <div class="flex items-center gap-2 sm:gap-3">
                                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-800 dark:text-white shadow-lg shrink-0" style="background-color: <?= esc($cat['color']) ?>">
@@ -152,7 +152,7 @@ function editCat(cat) {
                 </div>
             </div>
         `,
-        confirmText: '<?= lang('App.save_changes') ?>',
+        confirmText: '<?= lang('App.save') ?>',
         confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
         onConfirm: () => {
             const data = {
@@ -172,21 +172,79 @@ function submitCat(data) {
     showLoading();
     const formData = new FormData();
     Object.keys(data).forEach(key => formData.append(key, data[key]));
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
     const url = data.id ? '<?= base_url('category/update/') ?>' + data.id : '<?= base_url('category/store') ?>';
 
-    fetch(url, { method: 'POST', body: formData })
+    fetch(url, { 
+        method: 'POST', 
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
         .then(r => r.json())
         .then(res => {
             hideLoading();
             if (res.status === 'success') {
                 Modal.hide();
-                Toast.fire({ icon: 'success', title: res.message }).then(() => location.reload());
+                Toast.fire({ icon: 'success', title: res.message, timer: 2000 });
+                updateCatRow(res.category, !data.id);
             } else {
                 Toast.fire({ icon: 'error', title: res.message });
             }
         })
         .catch(err => { hideLoading(); Toast.fire({ icon: 'error', title: 'Error' }); });
+}
+
+function updateCatRow(cat, isNew) {
+    const tbody = document.querySelector('table tbody');
+    const emptyState = tbody.querySelector('td[colspan]');
+    if (emptyState) emptyState.parentElement.remove();
+
+    const typeBadge = cat.type === 'income' ? 
+        `<span class="bg-emerald-500/10 text-emerald-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border border-emerald-500/20 whitespace-nowrap inline-flex items-center">
+            <ion-icon name="trending-up-outline" class="hidden sm:inline-block mr-1"></ion-icon><?= lang('App.income') ?>
+        </span>` : 
+        `<span class="bg-red-500/10 text-red-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border border-red-500/20 whitespace-nowrap inline-flex items-center">
+            <ion-icon name="trending-down-outline" class="hidden sm:inline-block mr-1"></ion-icon><?= lang('App.expense') ?>
+        </span>`;
+
+    const actions = `
+        <div class="flex items-center justify-end gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onclick='editCat(${JSON.stringify(cat)})' class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.edit') ?>">
+                <ion-icon name="create-outline"></ion-icon>
+            </button>
+            <button onclick="deleteCat(${cat.id})" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.delete') ?>">
+                <ion-icon name="trash-outline"></ion-icon>
+            </button>
+        </div>
+    `;
+
+    const rowHTML = `
+        <td class="px-3 sm:px-6 py-4">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-800 dark:text-white shadow-lg shrink-0" style="background-color: ${cat.color}">
+                    <ion-icon name="${cat.icon}" class="text-lg sm:text-xl"></ion-icon>
+                </div>
+                <div class="min-w-0">
+                    <p class="font-bold text-slate-800 dark:text-white text-sm sm:text-base truncate">${cat.name}</p>
+                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 capitalize truncate">${cat.type}</p>
+                </div>
+            </div>
+        </td>
+        <td class="px-3 sm:px-6 py-4">${typeBadge}</td>
+        <td class="px-3 sm:px-6 py-4 text-right">${actions}</td>
+    `;
+
+    if (isNew) {
+        const tr = document.createElement('tr');
+        tr.id = `cat-${cat.id}`;
+        tr.className = 'hover:bg-slate-700/20 transition-colors group';
+        tr.innerHTML = rowHTML;
+        tbody.insertBefore(tr, tbody.firstChild);
+    } else {
+        const tr = document.getElementById(`cat-${cat.id}`);
+        if (tr) tr.innerHTML = rowHTML;
+    }
 }
 
 function deleteCat(id) {
@@ -199,14 +257,18 @@ function deleteCat(id) {
             showLoading();
             fetch('<?= base_url('category/delete/') ?>' + id, { 
                 method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                    'X-Requested-With': 'XMLHttpRequest' 
+                }
             })
             .then(res => res.json())
             .then(data => {
                 hideLoading();
                 if(data.status === 'success') {
                     Modal.hide();
-                    location.reload();
+                    document.getElementById('cat-'+id)?.remove();
+                    Toast.fire({ icon: 'success', title: data.message });
                 } else {
                     Toast.fire({ icon: 'error', title: data.message });
                 }
