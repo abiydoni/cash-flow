@@ -207,18 +207,21 @@ class Dues extends BaseController
         ]);
 
         if ($this->request->isAJAX()) {
-            $summary = $this->paymentModel->selectSum('amount_paid', 'total_paid')
-                ->where('member_id', $memberId)
+            $records = $this->paymentModel->where('member_id', $memberId)
                 ->where('dues_type_id', $duesTypeId)
                 ->where('month', $month)
                 ->where('year', $year)
-                ->get()->getRowArray();
+                ->findAll();
+
+            $totalPaid = 0;
+            foreach($records as $r) $totalPaid += $r['amount_paid'];
 
             return $this->response->setJSON([
                 'status' => 'success', 
                 'message' => lang('App.save_success'),
                 'payment' => [
-                    'total_paid' => $summary['total_paid'] ?? 0
+                    'total_paid' => $totalPaid,
+                    'records' => $records
                 ]
             ]);
         }
@@ -247,12 +250,14 @@ class Dues extends BaseController
         // Delete payment record
         $this->paymentModel->delete($id);
 
-        $summary = $this->paymentModel->selectSum('amount_paid', 'total_paid')
-            ->where('member_id', $memberId)
+        $records = $this->paymentModel->where('member_id', $memberId)
             ->where('dues_type_id', $duesTypeId)
             ->where('month', $month)
             ->where('year', $year)
-            ->get()->getRowArray();
+            ->findAll();
+
+        $totalPaid = 0;
+        foreach($records as $r) $totalPaid += $r['amount_paid'];
 
         return $this->response->setJSON([
             'status' => 'success', 
@@ -260,7 +265,8 @@ class Dues extends BaseController
             'month' => $month,
             'dues_type_id' => $duesTypeId,
             'summary' => [
-                'total_paid' => $summary['total_paid'] ?? 0
+                'total_paid' => $totalPaid,
+                'records' => $records
             ]
         ]);
     }

@@ -499,6 +499,10 @@ function deletePayment(id) {
     });
 }
 function updateMatrixCell(month, typeId, summary) {
+    // Sync global data variable for detail modals
+    if (!paymentGrid[month]) paymentGrid[month] = {};
+    paymentGrid[month][typeId] = summary;
+
     const statusCell = document.getElementById(`cell-status-${month}-${typeId}`);
     const actionsCell = document.getElementById(`cell-actions-${month}-${typeId}`);
     if (!statusCell || !actionsCell) return;
