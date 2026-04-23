@@ -164,7 +164,7 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
 
         <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
         <div class="px-4 py-2 border-t border-slate-200 dark:border-slate-700">
-            <?= $pager->links('default', 'App\Views\pager\tailwind') ?>
+            <?= $pager->links('default', 'tailwind') ?>
         </div>
         <?php endif; ?>
     <?php else: ?>
