@@ -65,8 +65,10 @@ class Transaction extends BaseController
             $openingBalance = $this->model->getOpeningBalance($userId, $filters['month'], $filters);
         }
 
-        $incomeCategories  = $this->catModel->getForUser($userId, 'income');
-        $expenseCategories = $this->catModel->getForUser($userId, 'expense');
+        // Optimize: Fetch all categories in one query and split in PHP
+        $allCategories = $this->catModel->getForUser($userId);
+        $incomeCategories  = array_filter($allCategories, fn($c) => $c['type'] === 'income');
+        $expenseCategories = array_filter($allCategories, fn($c) => $c['type'] === 'expense');
 
         $grandTotalBalance = $this->model->getGrandTotalBalance($userId);
         
@@ -87,8 +89,9 @@ class Transaction extends BaseController
         $userId = session()->get('user_id');
         $type   = $this->request->getGet('type') ?? 'expense';
 
-        $incomeCategories  = $this->catModel->getForUser($userId, 'income');
-        $expenseCategories = $this->catModel->getForUser($userId, 'expense');
+        $allCategories = $this->catModel->getForUser($userId);
+        $incomeCategories  = array_filter($allCategories, fn($c) => $c['type'] === 'income');
+        $expenseCategories = array_filter($allCategories, fn($c) => $c['type'] === 'expense');
 
         return view('transaction/form', [
             'mode'              => 'create',
@@ -161,8 +164,9 @@ class Transaction extends BaseController
             return redirect()->to('/transaction')->with('error', lang('App.not_found'));
         }
 
-        $incomeCategories  = $this->catModel->getForUser($userId, 'income');
-        $expenseCategories = $this->catModel->getForUser($userId, 'expense');
+        $allCategories = $this->catModel->getForUser($userId);
+        $incomeCategories  = array_filter($allCategories, fn($c) => $c['type'] === 'income');
+        $expenseCategories = array_filter($allCategories, fn($c) => $c['type'] === 'expense');
 
         return view('transaction/form', [
             'mode'              => 'edit',

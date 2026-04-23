@@ -31,8 +31,7 @@ class Dashboard extends BaseController
         $balance   = $summary['total_income'] - $summary['total_expense'];
         $openingBalance = $this->transModel->getOpeningBalance($userId, $month);
         
-        $recentTx  = $this->transModel->getWithCategory($userId, ['month' => $month]);
-        $recentTx  = array_slice($recentTx, 0, 10);
+        $recentTx  = $this->transModel->getWithCategory($userId, ['month' => $month], null, 10);
         $chartData = $this->transModel->getLast7DaysChart($userId);
         $byCategory = $this->transModel->getExpenseByCategory($userId, $month);
         $budgets   = $this->budgetModel->getWithSpending($userId, $month);

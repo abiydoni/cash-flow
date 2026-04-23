@@ -27,7 +27,7 @@ class TransactionModel extends Model
         'transaction_date' => 'required|valid_date',
     ];
 
-    public function getWithCategory(?int $userId, array $filters = [], int $perPage = null)
+    public function getWithCategory(?int $userId, array $filters = [], int $perPage = null, int $limit = null)
     {
         if (!$userId) return [];
 
@@ -55,10 +55,14 @@ class TransactionModel extends Model
         }
 
         $this->orderBy('transactions.transaction_date', 'DESC')
-            ->orderBy('transactions.created_at', 'DESC');
+             ->orderBy('transactions.id', 'DESC');
 
         if ($perPage) {
             return $this->paginate($perPage);
+        }
+
+        if ($limit) {
+            $this->limit($limit);
         }
 
         return $this->findAll();
