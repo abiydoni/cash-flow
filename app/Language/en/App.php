@@ -253,7 +253,7 @@ return [
     'once' => 'One-time',
     'select' => 'Select',
     'monthly_summary' => 'Monthly Summary',
-    'dues_report' => 'Dues Report',
+    'system' => 'SYS',
     'financial_mgmt' => 'Financial Management',
     'main_menu' => 'Main Menu',
     'reports' => 'Reports',

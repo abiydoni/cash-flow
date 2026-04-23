@@ -253,7 +253,6 @@ return [
     'once' => 'Sekali Bayar',
     'select' => 'Pilih',
     'monthly_summary' => 'Ringkasan Bulanan',
-    'dues_report' => 'Laporan Iuran',
     'system' => 'SYS',
     'financial_mgmt' => 'Manajemen Keuangan',
     'main_menu' => 'Menu Utama',
