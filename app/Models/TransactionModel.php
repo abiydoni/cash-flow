@@ -40,7 +40,7 @@ class TransactionModel extends Model
             $this->where('transactions.type', $filters['type']);
         }
         if (!empty($filters['month'])) {
-            $this->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m')", $filters['month']);
+            $this->like('transactions.transaction_date', $filters['month'], 'after');
         }
         if (!empty($filters['category_id'])) {
             $this->where('transactions.category_id', $filters['category_id']);
@@ -70,7 +70,7 @@ class TransactionModel extends Model
             COUNT(*) AS total_transactions"
         )
         ->where('user_id', $userId)
-        ->where("DATE_FORMAT(transaction_date, '%Y-%m')", $month)
+        ->like('transaction_date', $month, 'after')
         ->get()->getRowArray();
 
         return $result ?? ['total_income' => 0, 'total_expense' => 0, 'total_transactions' => 0];
@@ -83,7 +83,7 @@ class TransactionModel extends Model
             ->join('categories', 'categories.id = transactions.category_id', 'left')
             ->where('transactions.user_id', $userId)
             ->where('transactions.type', 'expense')
-            ->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m')", $month)
+            ->like('transactions.transaction_date', $month, 'after')
             ->groupBy('transactions.category_id')
             ->orderBy('total', 'DESC')
             ->findAll();
@@ -127,7 +127,7 @@ class TransactionModel extends Model
             $builder->where('transactions.user_id', $filters['user_id']);
         }
         if (!empty($filters['month'])) {
-            $builder->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m')", $filters['month']);
+            $builder->like('transactions.transaction_date', $filters['month'], 'after');
         }
 
         return $builder->orderBy('transactions.transaction_date', 'DESC')->findAll();
@@ -142,7 +142,7 @@ class TransactionModel extends Model
                 COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) -
                 COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS opening_balance"
             )
-            ->where("DATE_FORMAT(transaction_date, '%Y-%m') <", $month);
+            ->where('transaction_date <', $month . '-01');
 
         if ($userId) {
             $builder->where('user_id', $userId);

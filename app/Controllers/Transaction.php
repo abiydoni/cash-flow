@@ -41,7 +41,7 @@ class Transaction extends BaseController
             ->where('transactions.user_id', $userId);
 
         if (!empty($filters['type'])) $summary->where('transactions.type', $filters['type']);
-        if (!empty($filters['month'])) $summary->where("DATE_FORMAT(transactions.transaction_date, '%Y-%m')", $filters['month']);
+        if (!empty($filters['month'])) $summary->like('transactions.transaction_date', $filters['month'], 'after');
         if (!empty($filters['category_id'])) $summary->where('transactions.category_id', $filters['category_id']);
         if (!empty($filters['search'])) {
             $summary->groupStart()
