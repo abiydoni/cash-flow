@@ -20,8 +20,10 @@ class CategoryModel extends Model
     /**
      * Get categories visible to a user: global (user_id=null) + user's own.
      */
-    public function getForUser(int $userId, string $type = null): array
+    public function getForUser(?int $userId, string $type = null): array
     {
+        if (!$userId) return [];
+
         $builder = $this->where('is_active', 1)
             ->groupStart()
                 ->where('user_id', null)
