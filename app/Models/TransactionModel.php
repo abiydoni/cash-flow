@@ -65,8 +65,8 @@ class TransactionModel extends Model
     public function getMonthlySummary(int $userId, string $month): array
     {
         $result = $this->select("
-            SUM(CASE WHEN type='income' THEN amount ELSE 0 END) AS total_income,
-            SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS total_expense,
+            COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) AS total_income,
+            COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS total_expense,
             COUNT(*) AS total_transactions"
         )
         ->where('user_id', $userId)
@@ -139,8 +139,8 @@ class TransactionModel extends Model
     public function getOpeningBalance(?int $userId, string $month, array $filters = []): float
     {
         $builder = $this->select("
-                SUM(CASE WHEN type='income' THEN amount ELSE 0 END) -
-                SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS opening_balance"
+                COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) -
+                COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS opening_balance"
             )
             ->where("DATE_FORMAT(transaction_date, '%Y-%m') <", $month);
 
@@ -170,8 +170,8 @@ class TransactionModel extends Model
     public function getGrandTotalBalance(int $userId): float
     {
         $result = $this->select("
-                SUM(CASE WHEN type='income' THEN amount ELSE 0 END) -
-                SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS total_balance"
+                COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) -
+                COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS total_balance"
             )
             ->where('user_id', $userId)
             ->get()->getRowArray();

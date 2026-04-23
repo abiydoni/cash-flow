@@ -34,8 +34,8 @@ class Transaction extends BaseController
 
         // Get total summary for filtered transactions (not just current page)
         $summary = $this->model->select("
-                SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END) AS total_income,
-                SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END) AS total_expense,
+                COALESCE(SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END), 0) AS total_income,
+                COALESCE(SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END), 0) AS total_expense,
                 COUNT(*) AS total_count"
             )->join('categories', 'categories.id = transactions.category_id', 'left')
             ->where('transactions.user_id', $userId);
@@ -49,7 +49,11 @@ class Transaction extends BaseController
                 ->orLike('categories.name', $filters['search'])
             ->groupEnd();
         }
-        $totals = $summary->get()->getRowArray();
+        $totals = $summary->get()->getRowArray() ?? [
+            'total_income' => 0,
+            'total_expense' => 0,
+            'total_count' => 0
+        ];
         
         // Calculate Opening Balance if month filter is set
         $openingBalance = null;
