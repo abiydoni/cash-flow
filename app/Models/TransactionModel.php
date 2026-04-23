@@ -27,8 +27,10 @@ class TransactionModel extends Model
         'transaction_date' => 'required|valid_date',
     ];
 
-    public function getWithCategory(int $userId, array $filters = [], int $perPage = null)
+    public function getWithCategory(?int $userId, array $filters = [], int $perPage = null)
     {
+        if (!$userId) return [];
+
         $this->select('transactions.*, 
                 categories.name AS category_name, categories.icon AS category_icon, categories.color AS category_color,
                 dues_payments.id AS dues_payment_id')
@@ -62,8 +64,10 @@ class TransactionModel extends Model
         return $this->findAll();
     }
 
-    public function getMonthlySummary(int $userId, string $month): array
+    public function getMonthlySummary(?int $userId, string $month): array
     {
+        if (!$userId) return ['total_income' => 0, 'total_expense' => 0, 'total_transactions' => 0];
+
         $result = $this->select("
             COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) AS total_income,
             COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS total_expense,
@@ -76,8 +80,10 @@ class TransactionModel extends Model
         return $result ?? ['total_income' => 0, 'total_expense' => 0, 'total_transactions' => 0];
     }
 
-    public function getExpenseByCategory(int $userId, string $month): array
+    public function getExpenseByCategory(?int $userId, string $month): array
     {
+        if (!$userId) return [];
+
         return $this->select('categories.name, categories.icon, categories.color,
                 SUM(transactions.amount) AS total')
             ->join('categories', 'categories.id = transactions.category_id', 'left')
@@ -89,8 +95,10 @@ class TransactionModel extends Model
             ->findAll();
     }
 
-    public function getLast7DaysChart(int $userId): array
+    public function getLast7DaysChart(?int $userId): array
     {
+        if (!$userId) return [];
+
         $rows = $this->select("
             DATE(transaction_date) as day,
             SUM(CASE WHEN type='income' THEN amount ELSE 0 END) AS income,
@@ -167,8 +175,10 @@ class TransactionModel extends Model
     /**
      * Get Grand Total Balance (Actual Current Balance).
      */
-    public function getGrandTotalBalance(int $userId): float
+    public function getGrandTotalBalance(?int $userId): float
     {
+        if (!$userId) return 0.0;
+
         $result = $this->select("
                 COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) -
                 COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS total_balance"

@@ -32,24 +32,28 @@ class Transaction extends BaseController
         $transactions = $this->model->getWithCategory($userId, $filters, $perPage);
         $pager        = $this->model->pager;
 
-        // Get total summary for filtered transactions (not just current page)
-        $summary = $this->model->select("
+        // Use direct DB for summary to be extra safe and avoid model state issues
+        $db = \Config\Database::connect();
+        $builder = $db->table('transactions')
+            ->select("
                 COALESCE(SUM(CASE WHEN transactions.type='income' THEN transactions.amount ELSE 0 END), 0) AS total_income,
                 COALESCE(SUM(CASE WHEN transactions.type='expense' THEN transactions.amount ELSE 0 END), 0) AS total_expense,
                 COUNT(*) AS total_count"
-            )->join('categories', 'categories.id = transactions.category_id', 'left')
-            ->where('transactions.user_id', $userId);
+            )
+            ->join('categories', 'categories.id = transactions.category_id', 'left')
+            ->where('transactions.user_id', $userId)
+            ->where('transactions.deleted_at', null);
 
-        if (!empty($filters['type'])) $summary->where('transactions.type', $filters['type']);
-        if (!empty($filters['month'])) $summary->like('transactions.transaction_date', $filters['month'], 'after');
-        if (!empty($filters['category_id'])) $summary->where('transactions.category_id', $filters['category_id']);
+        if (!empty($filters['type'])) $builder->where('transactions.type', $filters['type']);
+        if (!empty($filters['month'])) $builder->like('transactions.transaction_date', $filters['month'], 'after');
+        if (!empty($filters['category_id'])) $builder->where('transactions.category_id', $filters['category_id']);
         if (!empty($filters['search'])) {
-            $summary->groupStart()
+            $builder->groupStart()
                 ->like('transactions.description', $filters['search'])
                 ->orLike('categories.name', $filters['search'])
             ->groupEnd();
         }
-        $totals = $summary->get()->getRowArray() ?? [
+        $totals = $builder->get()->getRowArray() ?? [
             'total_income' => 0,
             'total_expense' => 0,
             'total_count' => 0
