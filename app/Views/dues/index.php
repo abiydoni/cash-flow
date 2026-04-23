@@ -41,7 +41,10 @@
                                 echo ($trans === 'App.' . $slug) ? esc($dt['name']) : $trans;
                             ?>
                         </h3>
-                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Tarif: Rp <?= number_format($dt['amount'], 0, ',', '.') ?></p>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5"><?= lang('App.tariff') ?>: Rp <?= number_format($dt['amount'], 0, ',', '.') ?></p>
+                        <p class="text-[9px] font-bold <?= $dt['period'] === 'monthly' ? 'text-blue-500' : ($dt['period'] === 'yearly' ? 'text-purple-500' : 'text-orange-500') ?> uppercase tracking-widest mt-0.5">
+                            <?= $dt['period'] === 'monthly' ? lang('App.monthly') : ($dt['period'] === 'yearly' ? lang('App.yearly') : lang('App.once')) ?>
+                        </p>
                     </div>
                     <div class="text-slate-300 dark:text-slate-600 group-hover:text-emerald-400 transition-colors">
                         <ion-icon name="chevron-forward-outline"></ion-icon>

@@ -65,6 +65,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('duestype',               'DuesType::index');
     $routes->post('duestype/store',        'DuesType::store');
     $routes->post('duestype/delete/(:num)','DuesType::delete/$1');
+    $routes->post('duestype/toggleActive/(:num)','DuesType::toggleActive/$1');
 
     // Reports
     $routes->get('report',                 'Report::index');

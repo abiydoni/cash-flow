@@ -72,12 +72,12 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Nama Lengkap <span class="text-red-400">*</span></label>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.full_name') ?> <span class="text-red-400">*</span></label>
                     <input name="full_name" type="text" value="<?= esc($u['full_name'] ?? '') ?>"
                         class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Email <span class="text-red-400">*</span></label>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5"><?= lang('App.email') ?> <span class="text-red-400">*</span></label>
                     <input name="email" type="email" value="<?= esc($u['email'] ?? '') ?>"
                         class="w-full bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-all font-medium" required>
                 </div>

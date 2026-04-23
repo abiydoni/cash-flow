@@ -84,7 +84,7 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
             </div>
             <div class="flex items-center justify-between sm:justify-end gap-2 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/50">
                 <div class="text-right">
-                    <p class="text-[8px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold leading-none mb-1"><?= lang('App.balance') ?> (MONTHLY)</p>
+                    <p class="text-[8px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold leading-none mb-1"><?= lang('App.balance') ?> (<?= lang('App.monthly_summary') ?>)</p>
                     <p class="text-sm font-black <?= $grandTotal >= 0 ? 'text-emerald-400' : 'text-red-400' ?> leading-none"><?= rupiah($grandTotal) ?></p>
                     <p class="text-[7px] text-slate-400 mt-1 uppercase"><?= lang('App.total') ?>: <span class="font-bold"><?= rupiah($grandTotalBalance) ?></span></p>
                 </div>
@@ -136,21 +136,20 @@ $types = ['income' => ['label'=>lang('App.income'),'color'=>'text-emerald-400','
 
                 <!-- Amount + Actions -->
                 <div class="flex items-center gap-3 flex-shrink-0">
-                    <div class="text-right">
-                        <p class="text-xs font-bold <?= $tx['type'] === 'income' ? 'text-emerald-400' : 'text-red-400' ?> tx-amount">
+                    <div class="text-right w-24 sm:w-32 flex-shrink-0">
+                        <p class="text-[13px] font-bold <?= $tx['type'] === 'income' ? 'text-emerald-400' : 'text-red-400' ?> tabular-nums tracking-tight">
                             <?= $tx['type'] === 'income' ? '+' : '-' ?><?= rupiah($tx['amount']) ?>
                         </p>
-                        <span class="inline-block text-xs px-1.5 py-0.5 rounded-md <?= $tx['type']==='income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400' ?> tx-type-label">
-                            <?= $types[$tx['type']]['label'] ?? $tx['type'] ?>
-                        </span>
+                        <div class="flex justify-end mt-0.5">
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider <?= $tx['type']==='income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400' ?> tx-type-label">
+                                <?= $types[$tx['type']]['label'] ?? $tx['type'] ?>
+                            </span>
+                        </div>
                     </div>
                     <?php if (empty($tx['dues_payment_id'])): ?>
-                    <div class="flex items-center gap-1">
-                        <button onclick="editTx(<?= esc(json_encode($tx), 'attr') ?>)" class="w-8 h-8 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 flex items-center justify-center transition-colors" title="<?= lang('App.edit') ?>">
-                            <ion-icon name="create-outline" class="text-sm"></ion-icon>
-                        </button>
-                        <button onclick="deleteTx(<?= $tx['id'] ?>)" class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-colors" title="<?= lang('App.delete') ?>">
-                            <ion-icon name="trash-outline" class="text-sm"></ion-icon>
+                    <div class="flex items-center">
+                        <button onclick="deleteTx(<?= $tx['id'] ?>)" class="w-8 h-8 text-slate-400 hover:text-red-500 transition-colors flex items-center justify-center" title="<?= lang('App.delete') ?>">
+                            <ion-icon name="trash-outline" class="text-lg"></ion-icon>
                         </button>
                     </div>
                     <?php else: ?>

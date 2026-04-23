@@ -115,6 +115,52 @@
             }
         }
     </script>
+    
+    <style>
+        /* Custom Toggle Switch */
+        .custom-toggle {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 18px;
+        }
+        .custom-toggle input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 20px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #10b981;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(18px);
+        }
+        .dark .toggle-slider {
+            background-color: #334155;
+        }
+    </style>
 
     <!-- Theme Handling Script -->
     <script>
@@ -320,9 +366,7 @@
                     <ion-icon name="moon-outline" class="hidden dark:block mt-0.5"></ion-icon>
                     <ion-icon name="sunny-outline" class="block dark:hidden mt-0.5"></ion-icon>
                 </button>
-                <a href="<?= base_url('transaction/create?type=income') ?>" class="hidden sm:flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
-                    <ion-icon name="add-outline"></ion-icon> <?= lang('App.record') ?>
-                </a>
+
                 <a href="<?= base_url('profile') ?>" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
                     <?php if (session('avatar')): ?>
                         <img src="<?= base_url(session('avatar')) ?>" class="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-400" alt="avatar">

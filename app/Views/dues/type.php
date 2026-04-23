@@ -45,7 +45,7 @@
                         <h3 class="font-bold text-slate-800 dark:text-white truncate group-hover:text-emerald-400 transition-colors"><?= esc($m['name']) ?></h3>
                         <div class="flex items-center gap-2 mt-0.5">
                             <span class="w-1.5 h-1.5 rounded-full <?= $m['is_active'] ? 'bg-emerald-500' : 'bg-slate-400' ?>"></span>
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-tight">Status: <?= $m['is_active'] ? lang('App.active') : lang('App.inactive') ?></p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-tight"><?= lang('App.status') ?>: <?= $m['is_active'] ? lang('App.active') : lang('App.inactive') ?></p>
                         </div>
                     </div>
                     <div class="text-slate-300 dark:text-slate-600 group-hover:text-emerald-400 transition-colors">
@@ -63,8 +63,10 @@
         <div class="flex items-center gap-3">
             <h1 class="text-2xl font-black uppercase tracking-tighter text-slate-900 leading-none">CashFlow</h1>
             <div class="border-l-2 border-slate-300 pl-3">
-                <h2 class="text-lg font-bold text-slate-800 uppercase italic"><?= lang('App.yearly_ledger') ?></h2>
-                <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest"><?= esc($type['name']) ?> - <?= $year ?></p>
+                <h2 class="text-lg font-bold text-slate-800 uppercase italic">
+                    <?= $type['period'] === 'monthly' ? lang('App.yearly_ledger') : ($type['period'] === 'yearly' ? lang('App.annual_report') : lang('App.dues_report')) ?>
+                </h2>
+                <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest"><?= esc($type['name']) ?> <?= $type['period'] !== 'once' ? '- ' . $year : '' ?></p>
             </div>
         </div>
         <div class="text-right text-[9px] font-bold text-slate-500 uppercase">
@@ -72,14 +74,22 @@
         </div>
     </div>
 
+    <?php 
+        $isMonthly = $type['period'] === 'monthly';
+        $monthsToLoop = $isMonthly ? range(1, 12) : [0]; 
+    ?>
     <table class="w-full text-[9px] border-collapse border border-slate-800">
         <thead>
             <tr class="bg-black text-white">
                 <th class="border border-slate-800 px-2 py-3 w-8 text-center">NO</th>
                 <th class="border border-slate-800 px-3 py-3 text-left w-48"><?= lang('App.member_name') ?></th>
-                <?php foreach($months as $mName): ?>
-                    <th class="border border-slate-800 px-1 py-3 text-center uppercase tracking-tighter w-12"><?= substr($mName, 0, 3) ?></th>
-                <?php endforeach; ?>
+                <?php if ($isMonthly): ?>
+                    <?php foreach($months as $mName): ?>
+                        <th class="border border-slate-800 px-1 py-3 text-center uppercase tracking-tighter w-12"><?= substr($mName, 0, 3) ?></th>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <th class="border border-slate-800 px-1 py-3 text-center uppercase tracking-tighter">Status</th>
+                <?php endif; ?>
                 <th class="border border-slate-800 px-2 py-3 text-right w-24">TOTAL</th>
             </tr>
         </thead>
@@ -87,7 +97,7 @@
             <?php 
                 $i = 1; 
                 $grandTotal = 0;
-                $monthlyTotals = array_fill(1, 12, 0);
+                $monthlyTotals = array_fill(0, 13, 0);
             ?>
             <?php foreach($members as $m): ?>
                 <?php 
@@ -99,12 +109,12 @@
                 <tr class="even:bg-slate-50">
                     <td class="border border-slate-300 px-1 py-2 text-center font-bold text-slate-400"><?= $i++ ?></td>
                     <td class="border border-slate-300 px-3 py-2 font-bold uppercase truncate"><?= esc($m['name']) ?></td>
-                    <?php for($mIdx = 1; $mIdx <= 12; $mIdx++): ?>
+                    <?php foreach($monthsToLoop as $mIdx): ?>
                         <?php 
                             $paid = $paymentMatrix[$m['id']][$mIdx] ?? 0;
                             $memberTotal += $paid;
                             $monthlyTotals[$mIdx] += $paid;
-                            $isDisabled = ($year < $joinYear) || ($year == $joinYear && $mIdx < $joinMonth);
+                            $isDisabled = ($type['period'] !== 'once') && (($year < $joinYear) || ($year == $joinYear && $mIdx > 0 && $mIdx < $joinMonth));
                         ?>
                         <td class="border border-slate-300 px-1 py-2 text-center">
                             <?php if($paid > 0): ?>
@@ -115,7 +125,7 @@
                                 <span class="text-red-400 font-bold opacity-30">X</span>
                             <?php endif; ?>
                         </td>
-                    <?php endfor; ?>
+                    <?php endforeach; ?>
                     <td class="border border-slate-300 px-2 py-2 text-right font-black bg-slate-100/50">
                         <?= number_format($memberTotal, 0, ',', '.') ?>
                     </td>
@@ -126,11 +136,11 @@
         <tfoot class="bg-slate-900 text-white font-bold">
             <tr>
                 <td colspan="2" class="border border-slate-800 px-3 py-3 text-right uppercase tracking-widest text-[10px]"><?= lang('App.total_per_month') ?></td>
-                <?php for($mIdx = 1; $mIdx <= 12; $mIdx++): ?>
+                <?php foreach($monthsToLoop as $mIdx): ?>
                     <td class="border border-slate-800 px-1 py-3 text-center text-[8px] bg-slate-800">
                         <?= number_format($monthlyTotals[$mIdx], 0, '', '.') ?>
                     </td>
-                <?php endfor; ?>
+                <?php endforeach; ?>
                 <td class="border border-slate-800 px-2 py-3 text-right text-[11px] bg-emerald-600">
                     <?= number_format($grandTotal, 0, ',', '.') ?>
                 </td>

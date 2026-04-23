@@ -26,7 +26,10 @@ class DuesPaymentModel extends Model
         return $this->select('dues_payments.*, dues_types.name as type_name')
                     ->join('dues_types', 'dues_types.id = dues_payments.dues_type_id')
                     ->where('member_id', $memberId)
-                    ->where('year', $year)
+                    ->groupStart()
+                        ->where('year', $year)
+                        ->orWhere('year', 0)
+                    ->groupEnd()
                     ->findAll();
     }
 

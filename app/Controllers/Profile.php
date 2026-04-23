@@ -106,7 +106,7 @@ class Profile extends BaseController
             return redirect()->back()->with('errors', $this->validator->getErrors());
         }
 
-        if (! password_verify($this->request->getPost('old_password'), $user['password'])) {
+        if (! password_verify((string) $this->request->getPost('old_password'), (string) ($user['password'] ?? ''))) {
             return redirect()->back()->with('error', lang('App.password_incorrect'));
         }
 

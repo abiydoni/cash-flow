@@ -41,6 +41,165 @@
 </div>
 
 <!-- Screen Content (no-print) -->
+
+<?php if(!empty($yearlyDues) || !empty($onceDues)): ?>
+<div class="grid grid-cols-1 gap-6 mb-6">
+    <?php if(!empty($yearlyDues)): ?>
+    <div class="bg-white dark:bg-slate-800 rounded-[2rem] overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700">
+        <div class="p-6 border-b border-slate-100 dark:border-slate-700 bg-purple-50/50 dark:bg-purple-900/20">
+            <h3 class="text-sm font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                <ion-icon name="calendar-number-outline" class="text-lg"></ion-icon>
+                <?= lang('App.yearly_dues') ?> (<?= $year ?>)
+            </h3>
+        </div>
+        <div class="p-6 space-y-4">
+            <?php 
+                $joinDate  = strtotime($member['join_date']);
+                $joinYear  = (int)date('Y', $joinDate);
+            ?>
+            <?php foreach($yearlyDues as $dt): ?>
+                <?php 
+                    $pg = $paymentGrid[0][$dt['id']] ?? null;
+                    $totalPaid = $pg ? $pg['total_paid'] : 0;
+                    $remaining = max(0, $dt['amount'] - $totalPaid);
+                    $isLunas = $totalPaid >= $dt['amount'];
+                    $isDisabled = ($year < $joinYear);
+                ?>
+                <div class="flex flex-col border-b border-slate-100 dark:border-slate-700/50 pb-4 last:border-0 last:pb-0 gap-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-white text-sm"><?= esc($dt['name']) ?></p>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1"><?= lang('App.tariff') ?>: Rp <?= number_format($dt['amount'], 0, ',', '.') ?></p>
+                        </div>
+                        <div class="sm:hidden text-right">
+                            <?php if($isLunas): ?>
+                                <span class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg px-2 py-1 text-[8px] font-bold uppercase tracking-widest inline-block text-center"><?= lang('App.lunas') ?></span>
+                            <?php else: ?>
+                                <span class="bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-lg px-2 py-1 text-[8px] font-bold uppercase tracking-widest inline-block text-center"><?= lang('App.belum_bayar') ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 sm:bg-transparent p-3 sm:p-0 rounded-xl gap-4">
+                        <div class="flex gap-6 flex-1">
+                            <div class="text-left">
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.paid') ?></p>
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Rp <?= number_format($totalPaid, 0, ',', '.') ?></p>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.remaining') ?></p>
+                                <p class="text-xs font-bold <?= $remaining > 0 ? 'text-red-500' : 'text-emerald-500' ?>">Rp <?= number_format($remaining, 0, ',', '.') ?></p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <div class="hidden sm:block text-right w-20">
+                                <?php if($isLunas): ?>
+                                    <span class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl px-2 py-1 text-[9px] font-bold uppercase tracking-widest block text-center"><?= lang('App.lunas') ?></span>
+                                <?php else: ?>
+                                    <span class="bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-xl px-2 py-1 text-[9px] font-bold uppercase tracking-widest block text-center"><?= lang('App.belum_bayar') ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex gap-1" id="cell-actions-0-<?= $dt['id'] ?>">
+                                <?php if (!$isLunas): ?>
+                                    <?php if ($isDisabled): ?>
+                                        <span class="text-[10px] text-slate-400"><ion-icon name="lock-closed-outline"></ion-icon></span>
+                                    <?php else: ?>
+                                        <button onclick="openPayModal(0, '<?= lang('App.yearly_dues') ?>', <?= $dt['id'] ?>, '<?= esc($dt['name']) ?>', <?= $remaining ?>)" 
+                                            class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all border border-emerald-200" title="<?= lang('App.pay') ?>">
+                                            <ion-icon name="card-outline"></ion-icon>
+                                        </button>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                <?php if($pg): ?>
+                                    <button onclick="openMonthDetailModal(0, '<?= lang('App.yearly_dues') ?>')" class="w-8 h-8 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 flex items-center justify-center transition-all border border-orange-200" title="<?= lang('App.details') ?>">
+                                        <ion-icon name="list-outline"></ion-icon>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if(!empty($onceDues)): ?>
+    <div class="bg-white dark:bg-slate-800 rounded-[2rem] overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700">
+        <div class="p-6 border-b border-slate-100 dark:border-slate-700 bg-orange-50/50 dark:bg-orange-900/20">
+            <h3 class="text-sm font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-2">
+                <ion-icon name="star-outline" class="text-lg"></ion-icon>
+                <?= lang('App.once_dues') ?>
+            </h3>
+        </div>
+        <div class="p-6 space-y-4">
+            <?php foreach($onceDues as $dt): ?>
+                <?php 
+                    $pg = $paymentGrid[0][$dt['id']] ?? null;
+                    $totalPaid = $pg ? $pg['total_paid'] : 0;
+                    $remaining = max(0, $dt['amount'] - $totalPaid);
+                    $isLunas = $totalPaid >= $dt['amount'];
+                ?>
+                <div class="flex flex-col border-b border-slate-100 dark:border-slate-700/50 pb-4 last:border-0 last:pb-0 gap-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-white text-sm"><?= esc($dt['name']) ?></p>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1"><?= lang('App.tariff') ?>: Rp <?= number_format($dt['amount'], 0, ',', '.') ?></p>
+                        </div>
+                        <div class="sm:hidden text-right">
+                            <?php if($isLunas): ?>
+                                <span class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg px-2 py-1 text-[8px] font-bold uppercase tracking-widest inline-block text-center"><?= lang('App.lunas') ?></span>
+                            <?php else: ?>
+                                <span class="bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-lg px-2 py-1 text-[8px] font-bold uppercase tracking-widest inline-block text-center"><?= lang('App.belum_bayar') ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 sm:bg-transparent p-3 sm:p-0 rounded-xl gap-4">
+                        <div class="flex gap-6 flex-1">
+                            <div class="text-left">
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.paid') ?></p>
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Rp <?= number_format($totalPaid, 0, ',', '.') ?></p>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1"><?= lang('App.remaining') ?></p>
+                                <p class="text-xs font-bold <?= $remaining > 0 ? 'text-red-500' : 'text-emerald-500' ?>">Rp <?= number_format($remaining, 0, ',', '.') ?></p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <div class="hidden sm:block text-right w-20">
+                                <?php if($isLunas): ?>
+                                    <span class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl px-2 py-1 text-[9px] font-bold uppercase tracking-widest block text-center"><?= lang('App.lunas') ?></span>
+                                <?php else: ?>
+                                    <span class="bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-xl px-2 py-1 text-[9px] font-bold uppercase tracking-widest block text-center"><?= lang('App.belum_bayar') ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex gap-1" id="cell-actions-0-<?= $dt['id'] ?>">
+                                <?php if (!$isLunas): ?>
+                                    <button onclick="openPayModal(0, '<?= lang('App.once_dues') ?>', <?= $dt['id'] ?>, '<?= esc($dt['name']) ?>', <?= $remaining ?>)" 
+                                        class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all border border-emerald-200" title="<?= lang('App.pay') ?>">
+                                        <ion-icon name="card-outline"></ion-icon>
+                                    </button>
+                                <?php endif; ?>
+                                <?php if($pg): ?>
+                                    <button onclick="openMonthDetailModal(0, '<?= lang('App.once_dues') ?>')" class="w-8 h-8 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 flex items-center justify-center transition-all border border-orange-200" title="<?= lang('App.details') ?>">
+                                        <ion-icon name="list-outline"></ion-icon>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<?php if(!empty($monthlyDues)): ?>
 <div class="bg-white dark:bg-slate-800 rounded-[2rem] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 no-print">
     <div class="p-8 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
         <h3 class="text-sm font-semibold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -59,7 +218,7 @@
                     <th class="px-1 py-4 text-[9px] font-semibold uppercase tracking-tighter border-b-2 border-slate-700 w-6 text-center">No</th>
                     <th class="px-3 py-4 text-[10px] font-semibold uppercase tracking-wider border-b-2 border-slate-700"><?= lang('App.month') ?></th>
                     <th class="px-3 py-4 text-[10px] font-semibold uppercase tracking-wider border-b-2 border-slate-700 text-center"><?= lang('App.total_tariff') ?></th>
-                    <?php foreach($duesTypes as $dt): ?>
+                    <?php foreach($monthlyDues as $dt): ?>
                         <th class="px-3 py-4 text-[10px] font-semibold uppercase tracking-wider border-b-2 border-slate-700 text-center">
                             <?php 
                                 $slug = preg_replace('/[^a-z0-9]/', '_', strtolower(trim($dt['name'])));
@@ -98,7 +257,7 @@
                         <td class="px-3 py-3 text-center font-bold text-slate-500 dark:text-slate-400 text-[10px]">
                             <span class="text-[8px] mr-0.5 opacity-30 font-normal">Rp</span><?= number_format($totalTariff, 0, ',', '.') ?>
                         </td>
-                        <?php foreach($duesTypes as $dt): ?>
+                        <?php foreach($monthlyDues as $dt): ?>
                             <?php 
                                 $pg = $paymentGrid[$mIdx][$dt['id']] ?? null; 
                                 $isLunas = $pg && $pg['total_paid'] >= $dt['amount'];
@@ -144,7 +303,7 @@
             <tfoot class="bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700">
                 <tr>
                     <td colspan="3" class="px-6 py-6 font-semibold uppercase tracking-wider text-xs text-slate-500 text-right"><?= lang('App.total_annual_payment') ?></td>
-                    <td colspan="<?= count($duesTypes) * 2 ?>" class="px-6 py-6 text-right text-xl font-bold text-emerald-500">
+                    <td colspan="<?= count($monthlyDues) * 2 ?>" class="px-6 py-6 text-right text-xl font-bold text-emerald-500">
                         <span class="text-xs mr-2 opacity-50 font-bold">Rp</span><?= number_format($screenPaidTotal, 0, ',', '.') ?>
                     </td>
                 </tr>
@@ -234,7 +393,7 @@
                     <th class="px-2 py-5 text-[10px] font-bold uppercase tracking-wider border-r border-slate-800 w-10 text-center">No</th>
                     <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-wider border-r border-slate-800 w-32"><?= lang('App.month_period') ?></th>
                     <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-wider border-r border-slate-800 text-center w-28"><?= lang('App.tariff') ?></th>
-                    <?php foreach($duesTypes as $dt): ?>
+                    <?php foreach($monthlyDues as $dt): ?>
                         <th class="px-4 py-5 text-[10px] font-bold uppercase tracking-wider border-r border-slate-800 text-center">
                             <?php 
                                 $slug = preg_replace('/[^a-z0-9]/', '_', strtolower(trim($dt['name'])));
@@ -267,7 +426,7 @@
                         <td class="px-8 py-4 text-center font-bold text-slate-500 text-xs border-r border-slate-300">
                             <span class="text-[8px] mr-1 opacity-30 font-normal">Rp</span><?= number_format($totalTariff, 0, ',', '.') ?>
                         </td>
-                        <?php foreach($duesTypes as $dt): ?>
+                        <?php foreach($monthlyDues as $dt): ?>
                             <?php 
                                 $pg = $paymentGrid[$mIdx][$dt['id']] ?? null; 
                                 $isLunas = $pg && $pg['total_paid'] >= $dt['amount'];
@@ -303,13 +462,13 @@
             <tfoot class="border-t-4 border-slate-900">
                 <tr class="bg-slate-100 text-slate-900">
                     <td colspan="2" class="px-8 py-4 font-bold uppercase text-[10px] tracking-wider border-r border-slate-200"><?= lang('App.total_annual_payment') ?> (<?= lang('App.paid') ?>)</td>
-                    <td colspan="<?= count($duesTypes) * 2 ?>" class="px-8 py-4 text-right text-lg font-bold text-emerald-600">
+                    <td colspan="<?= count($monthlyDues) * 2 ?>" class="px-8 py-4 text-right text-lg font-bold text-emerald-600">
                         <span class="text-xs mr-2 opacity-30 font-bold italic">Rp</span><?= number_format($yearlyPaidTotal, 0, ',', '.') ?>
                     </td>
                 </tr>
                 <tr class="bg-white text-slate-900 border-t border-slate-100">
                     <td colspan="2" class="px-8 py-4 font-bold uppercase text-[10px] tracking-wider border-r border-slate-200"><?= lang('App.remaining') ?> (<?= lang('App.unpaid') ?>)</td>
-                    <td colspan="<?= count($duesTypes) * 2 ?>" class="px-8 py-4 text-right text-lg font-bold text-red-500">
+                    <td colspan="<?= count($monthlyDues) * 2 ?>" class="px-8 py-4 text-right text-lg font-bold text-red-500">
                         <span class="text-xs mr-2 opacity-30 font-bold italic">Rp</span><?= number_format($yearlyRemainingTotal, 0, ',', '.') ?>
                     </td>
                 </tr>
@@ -329,6 +488,7 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <?= $this->endSection() ?>
 
@@ -499,6 +659,11 @@ function deletePayment(id) {
     });
 }
 function updateMatrixCell(month, typeId, summary) {
+    if (month == 0) {
+        window.location.reload();
+        return;
+    }
+
     // Sync global data variable for detail modals
     if (!paymentGrid[month]) paymentGrid[month] = {};
     paymentGrid[month][typeId] = summary;

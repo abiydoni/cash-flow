@@ -30,7 +30,7 @@ class Dues extends BaseController
         $userId = session()->get('user_id');
         $year   = $this->request->getGet('year') ?? date('Y');
         
-        $duesTypes = $this->duesTypeModel->where('user_id', $userId)->findAll();
+        $duesTypes = $this->duesTypeModel->where('user_id', $userId)->where('is_active', 1)->findAll();
         
         $data = [
             'title'     => lang('App.dues_payment'),
@@ -43,7 +43,7 @@ class Dues extends BaseController
     public function type($typeId)
     {
         $userId = session()->get('user_id');
-        $type = $this->duesTypeModel->where('user_id', $userId)->find($typeId);
+        $type = $this->duesTypeModel->where('user_id', $userId)->where('is_active', 1)->find($typeId);
         if (!$type) {
             return redirect()->to('/dues')->with('error', lang('App.error_occurred'));
         }
@@ -55,11 +55,17 @@ class Dues extends BaseController
         $memberIds = array_column($members, 'id');
         $paymentMatrix = [];
         if (!empty($memberIds)) {
-            $allPayments = $this->paymentModel
+            $allPaymentsQuery = $this->paymentModel
                 ->where('dues_type_id', $typeId)
-                ->where('year', $year)
-                ->whereIn('member_id', $memberIds)
-                ->findAll();
+                ->whereIn('member_id', $memberIds);
+                
+            if ($type['period'] === 'monthly') {
+                $allPaymentsQuery->where('year', $year);
+            } elseif ($type['period'] === 'yearly') {
+                $allPaymentsQuery->where('year', $year);
+            } // 'once' doesn't filter by year
+            
+            $allPayments = $allPaymentsQuery->findAll();
 
             foreach ($allPayments as $p) {
                 if (!isset($paymentMatrix[$p['member_id']])) {
@@ -97,7 +103,7 @@ class Dues extends BaseController
         
         $payments = $this->paymentModel->getPaymentGrid($memberId, $year);
         
-        $duesTypesQuery = $this->duesTypeModel->where('user_id', $userId);
+        $duesTypesQuery = $this->duesTypeModel->where('user_id', $userId)->where('is_active', 1);
         if ($selectedTypeId) {
             $duesTypesQuery->where('id', $selectedTypeId);
         }
@@ -117,6 +123,15 @@ class Dues extends BaseController
             $paymentGrid[$p['month']][$p['dues_type_id']]['records'][] = $p;
         }
 
+        $monthlyDues = [];
+        $yearlyDues = [];
+        $onceDues = [];
+        foreach($duesTypes as $dt) {
+            if ($dt['period'] === 'monthly') $monthlyDues[] = $dt;
+            elseif ($dt['period'] === 'yearly') $yearlyDues[] = $dt;
+            else $onceDues[] = $dt;
+        }
+
         $data = [
             'title'       => lang('App.dues_detail') . ': ' . $member['name'],
             'member'      => $member,
@@ -124,6 +139,9 @@ class Dues extends BaseController
             'selectedTypeId' => $selectedTypeId,
             'selectedType'   => $selectedTypeId ? ($this->duesTypeModel->find($selectedTypeId)) : null,
             'duesTypes'   => $duesTypes,
+            'monthlyDues' => $monthlyDues,
+            'yearlyDues'  => $yearlyDues,
+            'onceDues'    => $onceDues,
             'paymentGrid' => $paymentGrid,
             'months'      => [
                 1 => lang('App.january'), 2 => lang('App.february'), 3 => lang('App.march'), 4 => lang('App.april'), 
@@ -141,7 +159,7 @@ class Dues extends BaseController
         $rules = [
             'member_id'    => 'required|integer',
             'dues_type_id' => 'required|integer',
-            'month'        => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[12]',
+            'month'        => 'required|integer|greater_than_equal_to[0]|less_than_equal_to[12]',
             'year'         => 'required|integer',
             'amount'       => 'required|numeric|greater_than[0]',
         ];
@@ -178,12 +196,19 @@ class Dues extends BaseController
         }
 
         // 2. Create Transaction (Journal Kas)
-        $monthName = [
+        $monthName = $month > 0 ? [
             1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
             7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
-        ][$month];
+        ][$month] : '';
         
-        $description = "Iuran {$duesType['name']} - {$member['name']} ({$monthName} {$year})";
+        $periodDesc = '';
+        if ($duesType['period'] === 'monthly') {
+            $periodDesc = "({$monthName} {$year})";
+        } elseif ($duesType['period'] === 'yearly') {
+            $periodDesc = "({$year})";
+        }
+        
+        $description = trim("Iuran {$duesType['name']} - {$member['name']} {$periodDesc}");
         
         $transId = $this->transModel->insert([
             'user_id'          => $userId,
@@ -192,7 +217,7 @@ class Dues extends BaseController
             'amount'           => $amount,
             'description'      => $description,
             'transaction_date' => $date,
-            'payment_method'   => 'cash'
+            'payment_method'   => 'bank_transfer'
         ]);
 
         // 3. Create Dues Payment record

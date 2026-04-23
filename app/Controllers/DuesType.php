@@ -17,6 +17,12 @@ class DuesType extends BaseController
     {
         $userId = session()->get('user_id');
         $duesTypes = $this->model->where('user_id', $userId)->findAll();
+        
+        $paymentModel = new \App\Models\DuesPaymentModel();
+        foreach ($duesTypes as &$dt) {
+            $dt['usage_count'] = $paymentModel->where('dues_type_id', $dt['id'])->countAllResults();
+        }
+
         return view('duestype/index', [
             'title'     => 'Kelola Jenis Iuran',
             'duesTypes' => $duesTypes
@@ -42,10 +48,12 @@ class DuesType extends BaseController
         }
 
         $data = [
-            'id'      => $id,
-            'user_id' => $userId,
-            'name'    => $this->request->getPost('name'),
-            'amount'  => $this->request->getPost('amount'),
+            'id'        => $id,
+            'user_id'   => $userId,
+            'name'      => $this->request->getPost('name'),
+            'amount'    => $this->request->getPost('amount'),
+            'period'    => $this->request->getPost('period') ?? 'monthly',
+            'is_active' => $this->request->getPost('is_active') ?? 1,
         ];
 
         $this->model->save($data);
@@ -70,7 +78,31 @@ class DuesType extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak']);
         }
 
+        $paymentModel = new \App\Models\DuesPaymentModel();
+        if ($paymentModel->where('dues_type_id', $id)->countAllResults() > 0) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Tipe ini tidak dapat dihapus karena sudah memiliki riwayat pembayaran. Silakan non-aktifkan tipe ini.']);
+        }
+
         $this->model->delete($id);
         return $this->response->setJSON(['status' => 'success', 'message' => lang('App.delete_success')]);
+    }
+
+    public function toggleActive($id)
+    {
+        $userId = session()->get('user_id');
+        $type = $this->model->where('id', $id)->where('user_id', $userId)->first();
+        
+        if (!$type) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak']);
+        }
+
+        $newStatus = $type['is_active'] ? 0 : 1;
+        $this->model->update($id, ['is_active' => $newStatus]);
+
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'message' => 'Status berhasil diubah', 
+            'is_active' => $newStatus
+        ]);
     }
 }

@@ -4,7 +4,7 @@
 <div class="flex items-center justify-between mb-4">
     <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
         <ion-icon name="pricetags-outline" class="text-emerald-400"></ion-icon>
-        <?= lang('App.manage_users') ?> <?= lang('App.category') ?> Global
+        <?= lang('App.category') ?> (SYS)
     </h2>
     <button onclick="addCat()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-800 dark:text-white px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
         <ion-icon name="add-outline" class="text-lg"></ion-icon> <?= lang('App.add') ?> <?= lang('App.category') ?>
@@ -71,7 +71,7 @@
                                 <td class="px-1.5 sm:px-4 py-2 sm:py-3 text-center hidden sm:table-cell">
                                     <?php if($cat['owner'] === 'Global' || strtolower($cat['owner']) === 'administrator' || strtolower($cat['owner']) === 'admin'): ?>
                                         <span class="inline-block bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-xs font-bold border border-slate-200 dark:border-slate-700 whitespace-nowrap uppercase">
-                                            SYSTEM
+                                            <?= lang('App.system') ?>
                                         </span>
                                     <?php else: ?>
                                         <span class="inline-block bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-xs font-bold whitespace-nowrap uppercase truncate max-w-[40px] sm:max-w-none">
@@ -105,7 +105,7 @@
 <script>
 function addCat() {
     Modal.show({
-        title: '<ion-icon name="pricetag-outline" class="text-emerald-500"></ion-icon> <?= lang('App.add') ?> <?= lang('App.category') ?> Global',
+        title: '<ion-icon name="pricetag-outline" class="text-emerald-500"></ion-icon> <?= lang('App.add') ?> <?= lang('App.category') ?> (SYS)',
         html: `
             <div class="space-y-4 text-left">
                 <div>
@@ -199,7 +199,7 @@ function updateCatRow(cat, isNew) {
                     <div class="mt-0 flex items-center gap-1.5">
                         <p class="text-[8px] sm:text-xs text-slate-500 dark:text-slate-400 truncate opacity-60">ID: #${cat.id}</p>
                         <div class="sm:hidden">
-                            <span class="bg-slate-100 dark:bg-slate-800 text-slate-500 px-1 py-0.25 rounded text-[7px] font-bold border border-slate-200 dark:border-slate-700">SYS</span>
+                            <span class="bg-slate-100 dark:bg-slate-800 text-slate-500 px-1 py-0.25 rounded text-[7px] font-bold border border-slate-200 dark:border-slate-700"><?= lang('App.system') ?></span>
                         </div>
                     </div>
                 </div>
@@ -207,7 +207,7 @@ function updateCatRow(cat, isNew) {
         </td>
         <td class="px-1.5 sm:px-4 py-2 sm:py-3 text-center">${typeBadge}</td>
         <td class="px-1.5 sm:px-4 py-2 sm:py-3 text-center hidden sm:table-cell">
-            <span class="inline-block bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-xs font-bold border border-slate-200 dark:border-slate-700 whitespace-nowrap uppercase">SYSTEM</span>
+            <span class="inline-block bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-xs font-bold border border-slate-200 dark:border-slate-700 whitespace-nowrap uppercase"><?= lang('App.system') ?></span>
         </td>
         <td class="px-1 sm:px-6 py-2 sm:py-3 text-right">
             <div class="flex justify-end gap-1 sm:gap-1.5">
@@ -235,7 +235,7 @@ function updateCatRow(cat, isNew) {
 
 function editCat(cat) {
     Modal.show({
-        title: '<ion-icon name="create-outline" class="text-indigo-500"></ion-icon> <?= lang('App.edit') ?> <?= lang('App.category') ?> Global',
+        title: '<ion-icon name="create-outline" class="text-indigo-500"></ion-icon> <?= lang('App.edit') ?> <?= lang('App.category') ?> (SYS)',
         html: `
             <div class="space-y-4 text-left">
                 <div>

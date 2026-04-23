@@ -110,7 +110,7 @@ function rupiah($n) {
     <?php $closingBalance = $openingBalance + $balance; ?>
     <div class="<?= $closingBalance >= 0 ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-red-500 to-rose-600' ?> rounded-2xl p-4 shadow-lg">
         <div class="flex items-center justify-between mb-2">
-            <p class="text-white/80 text-[13px] font-medium"><?= lang('App.balance') ?> (Monthly)</p>
+            <p class="text-white/80 text-[13px] font-medium"><?= lang('App.balance') ?> (<?= lang('App.monthly_summary') ?>)</p>
             <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
                 <ion-icon name="calendar-outline" class="text-white"></ion-icon>
             </div>

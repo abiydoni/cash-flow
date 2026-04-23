@@ -442,57 +442,48 @@ function updateUserRow(user, isNew) {
 
 function toggleUser(id, el) {
     const isNowChecked = el.checked;
-    Modal.show({
-        title: '<ion-icon name="help-circle-outline" class="text-indigo-500"></ion-icon> Update Status?',
-        html: '<p class="text-slate-600 dark:text-slate-400">Ubah status aktif user ini?</p>',
-        confirmText: 'Ya, Ubah',
-        confirmColorClass: 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20',
-        onConfirm: () => {
-            showLoading();
-            fetch(`<?= base_url('admin/users/toggle/') ?>${id}`, { 
-                method: 'POST',
-                headers: { 
-                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(r => r.json())
-                .then(data => {
-                    hideLoading();
-                    Modal.hide();
-                    const sw = document.getElementById('status-switch-'+id);
-                    const swM = document.getElementById('status-switch-m-'+id);
-                    const txt = document.getElementById('status-text-'+id);
-                    const txtM = document.getElementById('status-text-m-'+id);
-                    
-                    const activeTxt = '<?= lang('App.active') ?>';
-                    const inactiveTxt = '<?= lang('App.inactive') ?>';
-
-                    if (sw) sw.checked = data.active;
-                    if (swM) swM.checked = data.active;
-
-                    if (data.active) {
-                        if (txt) { txt.textContent = activeTxt; txt.classList.remove('text-slate-400'); txt.classList.add('text-emerald-500'); }
-                        if (txtM) { txtM.textContent = activeTxt; txtM.classList.remove('text-slate-400'); txtM.classList.add('text-emerald-500'); }
-                    } else {
-                        if (txt) { txt.textContent = inactiveTxt; txt.classList.remove('text-emerald-500'); txt.classList.add('text-slate-400'); }
-                        if (txtM) { txtM.textContent = inactiveTxt; txtM.classList.remove('text-emerald-500'); txtM.classList.add('text-slate-400'); }
-                    }
-                    Toast.fire({ icon: 'success', title: data.message });
-                })
-                .catch(err => {
-                    hideLoading();
-                    el.checked = !isNowChecked;
-                    Toast.fire({ icon: 'error', title: 'Error' });
-                });
+    showLoading();
+    fetch(`<?= base_url('admin/users/toggle/') ?>${id}`, { 
+        method: 'POST',
+        headers: { 
+            '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+            'X-Requested-With': 'XMLHttpRequest'
         }
-    });
+    })
+        .then(r => r.json())
+        .then(data => {
+            hideLoading();
+            const sw = document.getElementById('status-switch-'+id);
+            const swM = document.getElementById('status-switch-m-'+id);
+            const txt = document.getElementById('status-text-'+id);
+            const txtM = document.getElementById('status-text-m-'+id);
+            
+            const activeTxt = '<?= lang('App.active') ?>';
+            const inactiveTxt = '<?= lang('App.inactive') ?>';
+
+            if (sw) sw.checked = data.active;
+            if (swM) swM.checked = data.active;
+
+            if (data.active) {
+                if (txt) { txt.textContent = activeTxt; txt.classList.remove('text-slate-400'); txt.classList.add('text-emerald-500'); }
+                if (txtM) { txtM.textContent = activeTxt; txtM.classList.remove('text-slate-400'); txtM.classList.add('text-emerald-500'); }
+            } else {
+                if (txt) { txt.textContent = inactiveTxt; txt.classList.remove('text-emerald-500'); txt.classList.add('text-slate-400'); }
+                if (txtM) { txtM.textContent = inactiveTxt; txtM.classList.remove('text-emerald-500'); txtM.classList.add('text-slate-400'); }
+            }
+            Toast.fire({ icon: 'success', title: data.message });
+        })
+        .catch(err => {
+            hideLoading();
+            el.checked = !isNowChecked;
+            Toast.fire({ icon: 'error', title: 'Error' });
+        });
 }
 
 function deleteUser(id) {
     Modal.show({
-        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.delete_user') ?>',
-        html: '<p class="text-slate-600 dark:text-slate-400">Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.</p>',
+        title: '<ion-icon name="trash-outline" class="text-red-500"></ion-icon> <?= lang('App.delete_user_confirm') ?>',
+        html: '<p class="text-slate-600 dark:text-slate-400"><?= lang('App.delete_user_desc') ?></p>',
         confirmText: '<?= lang('App.delete') ?>',
         confirmColorClass: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
         onConfirm: () => {

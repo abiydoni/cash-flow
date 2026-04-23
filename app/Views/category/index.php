@@ -13,19 +13,20 @@
 </div>
 
 <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-xl">
-    <div class="overflow-x-auto">
+    <!-- Desktop Table View -->
+    <div class="hidden sm:block overflow-x-auto">
         <table class="w-full text-left text-sm">
             <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">
                 <tr>
-                    <th class="px-3 sm:px-6 py-4 font-semibold"><?= lang('App.category_name') ?></th>
-                    <th class="px-3 sm:px-6 py-4 font-semibold"><?= lang('App.type') ?></th>
-                    <th class="px-3 sm:px-6 py-4 font-semibold text-right"><?= lang('App.actions') ?></th>
+                    <th class="px-6 py-4 font-semibold"><?= lang('App.category_name') ?></th>
+                    <th class="px-6 py-4 font-semibold"><?= lang('App.type') ?></th>
+                    <th class="px-6 py-4 font-semibold text-right"><?= lang('App.actions') ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
                 <?php if(empty($categories)): ?>
                 <tr>
-                    <td colspan="3" class="px-3 sm:px-6 py-8 text-center text-slate-400 dark:text-slate-500">
+                    <td colspan="3" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                         <ion-icon name="pricetags-outline" class="text-4xl mb-2 opacity-50"></ion-icon>
                         <p><?= lang('App.category_no_data') ?></p>
                     </td>
@@ -33,29 +34,29 @@
                 <?php else: ?>
                     <?php foreach($categories as $cat): ?>
                     <tr class="hover:bg-slate-700/20 transition-colors group" id="cat-<?= $cat['id'] ?>">
-                        <td class="px-3 sm:px-6 py-4">
-                            <div class="flex items-center gap-2 sm:gap-3">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-800 dark:text-white shadow-lg shrink-0" style="background-color: <?= esc($cat['color']) ?>">
-                                    <ion-icon name="<?= esc($cat['icon']) ?>" class="text-lg sm:text-xl"></ion-icon>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-800 dark:text-white shadow-lg shrink-0" style="background-color: <?= esc($cat['color']) ?>">
+                                    <ion-icon name="<?= esc($cat['icon']) ?>" class="text-xl"></ion-icon>
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="font-bold text-slate-800 dark:text-white text-sm sm:text-base truncate"><?= esc($cat['name']) ?></p>
-                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 capitalize truncate"><?= esc($cat['type']) ?></p>
+                                    <p class="font-bold text-slate-800 dark:text-white text-base truncate"><?= esc($cat['name']) ?></p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 capitalize truncate"><?= esc($cat['type']) ?></p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-3 sm:px-6 py-4">
+                        <td class="px-6 py-4">
                             <?php if($cat['type'] === 'income'): ?>
-                                <span class="bg-emerald-500/10 text-emerald-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border border-emerald-500/20 whitespace-nowrap inline-flex items-center">
-                                    <ion-icon name="trending-up-outline" class="hidden sm:inline-block mr-1"></ion-icon><?= lang('App.income') ?>
+                                <span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-500/20 whitespace-nowrap inline-flex items-center">
+                                    <ion-icon name="trending-up-outline" class="mr-1"></ion-icon><?= lang('App.income') ?>
                                 </span>
                             <?php else: ?>
-                                <span class="bg-red-500/10 text-red-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border border-red-500/20 whitespace-nowrap inline-flex items-center">
-                                    <ion-icon name="trending-down-outline" class="hidden sm:inline-block mr-1"></ion-icon><?= lang('App.expense') ?>
+                                <span class="bg-red-500/10 text-red-400 px-3 py-1 rounded-full text-xs font-semibold border border-red-500/20 whitespace-nowrap inline-flex items-center">
+                                    <ion-icon name="trending-down-outline" class="mr-1"></ion-icon><?= lang('App.expense') ?>
                                 </span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-3 sm:px-6 py-4 text-right">
+                        <td class="px-6 py-4 text-right">
                             <?php if($cat['user_id'] == session('user_id')): ?>
                             <div class="flex items-center justify-end gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onclick="editCat(<?= esc(json_encode($cat), 'attr') ?>)" class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors flex items-center justify-center" title="<?= lang('App.edit') ?>">
@@ -66,7 +67,7 @@
                                 </button>
                             </div>
                             <?php else: ?>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic opacity-50"><?= lang('App.system') ?></span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic opacity-50">SYS</span>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -74,6 +75,55 @@
                 <?php endif; ?>
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="block sm:hidden divide-y divide-slate-100 dark:divide-slate-700/50">
+        <?php if(empty($categories)): ?>
+            <div class="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                <ion-icon name="pricetags-outline" class="text-4xl mb-2 opacity-30"></ion-icon>
+                <p><?= lang('App.category_no_data') ?></p>
+            </div>
+        <?php else: ?>
+            <?php foreach($categories as $cat): ?>
+            <div class="p-4 bg-white dark:bg-slate-800" id="cat-mobile-<?= $cat['id'] ?>">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-800 dark:text-white shadow-lg shrink-0" style="background-color: <?= esc($cat['color']) ?>">
+                            <ion-icon name="<?= esc($cat['icon']) ?>" class="text-xl"></ion-icon>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-800 dark:text-white text-sm truncate"><?= esc($cat['name']) ?></p>
+                            <div class="mt-1">
+                                <?php if($cat['type'] === 'income'): ?>
+                                    <span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-emerald-500/20">
+                                        <?= lang('App.income') ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-red-500/20">
+                                        <?= lang('App.expense') ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <?php if($cat['user_id'] == session('user_id')): ?>
+                            <button onclick="editCat(<?= esc(json_encode($cat), 'attr') ?>)" class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center" title="<?= lang('App.edit') ?>">
+                                <ion-icon name="create-outline"></ion-icon>
+                            </button>
+                            <button onclick="deleteCat(<?= $cat['id'] ?>)" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center" title="<?= lang('App.delete') ?>">
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </button>
+                        <?php else: ?>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic opacity-50 px-2">SYS</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </div>
 

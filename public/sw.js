@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cashflow-v1';
+const CACHE_NAME = 'cashflow-v3';
 const OFFLINE_URL = 'offline.html';
 
 const ASSETS_TO_CACHE = [
@@ -64,6 +64,10 @@ self.addEventListener('fetch', (event) => {
                 });
                 
                 return networkResponse;
+            }).catch((error) => {
+                console.warn('Service Worker fetch failed:', error);
+                // Return cached response if available, or throw
+                return cachedResponse;
             });
             return cachedResponse || fetchPromise;
         })

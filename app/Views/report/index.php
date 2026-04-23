@@ -162,8 +162,8 @@
                             <?= number_format($balance, 0, ',', '.') ?>
                         </td>
                         <td class="px-1 py-2 text-right no-print">
-                            <a href="<?= base_url("report/month/{$year}/{$mIdx}") ?>" class="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10 transition-all shadow-sm" title="<?= lang('App.view_report') ?>">
-                                <ion-icon name="print-outline" class="text-[10px]"></ion-icon>
+                            <a href="<?= base_url("report/month/{$year}/{$mIdx}") ?>" class="inline-flex items-center justify-center w-9 h-9 text-emerald-500 hover:text-emerald-600 transition-all group/btn" title="<?= lang('App.view_report') ?>">
+                                <ion-icon name="print-outline" class="text-xl"></ion-icon>
                             </a>
                         </td>
                     </tr>

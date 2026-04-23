@@ -12,14 +12,16 @@ class DuesTypeModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['user_id', 'name', 'amount'];
+    protected $allowedFields    = ['user_id', 'name', 'amount', 'period', 'is_active'];
 
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
     protected $validationRules      = [
-        'name'   => 'required|min_length[3]|max_length[100]',
-        'amount' => 'required|numeric|greater_than_equal_to[0]',
+        'name'      => 'required|min_length[3]|max_length[100]',
+        'amount'    => 'required|numeric|greater_than_equal_to[0]',
+        'period'    => 'required|in_list[monthly,yearly,once]',
+        'is_active' => 'required|in_list[0,1]',
     ];
 }
