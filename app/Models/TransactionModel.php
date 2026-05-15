@@ -79,6 +79,7 @@ class TransactionModel extends Model
         )
         ->where('user_id', $userId)
         ->like('transaction_date', $month, 'after')
+        ->where('transactions.deleted_at', null)
         ->get()->getRowArray();
 
         return $result ?? ['total_income' => 0, 'total_expense' => 0, 'total_transactions' => 0];
@@ -154,7 +155,8 @@ class TransactionModel extends Model
                 COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) -
                 COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS opening_balance"
             )
-            ->where('transaction_date <', $month . '-01');
+            ->where('transaction_date <', $month . '-01')
+            ->where('transactions.deleted_at', null);
 
         if ($userId) {
             $builder->where('user_id', $userId);
@@ -188,6 +190,7 @@ class TransactionModel extends Model
                 COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) AS total_balance"
             )
             ->where('user_id', $userId)
+            ->where('transactions.deleted_at', null)
             ->get()->getRowArray();
             
         return (float) ($result['total_balance'] ?? 0);
